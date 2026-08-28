@@ -7,15 +7,10 @@ import {
   REFERENCE_CAPS,
 } from "@/lib/donor-profile/data";
 import type { Donation } from "@/lib/donor-profile/types";
-import { CountUpNumber } from "./CountUpNumber";
+import { FadeInNumber } from "./FadeInNumber";
+import { ProgressBar } from "./ProgressBar";
 import { DONATION_TYPE_COLOR } from "./donationColors";
 import { DropIcon } from "./DropIcon";
-
-const INTERVAL_REASON: Record<string, string> = {
-  "sangre-entera": "El cuerpo repone el hierro cada ~2 meses, por eso el espacio entre donaciones.",
-  plaquetas: "Se reponen en pocos días, por eso podés donar cada 14 días.",
-  plasma: "El cuerpo lo repone rápido, pero hay un tope anual de referencia para cuidar tu salud a largo plazo.",
-};
 
 function encouragingLabel(count: number, cap?: number): string {
   if (!cap) {
@@ -47,12 +42,13 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
       )}
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        {donationTypes.map((type) => {
+        {donationTypes.map((type, index) => {
           const count = counts[type.id];
           const totalCount = totalCounts[type.id];
           const cap = REFERENCE_CAPS[type.id];
           const color = DONATION_TYPE_COLOR[type.id];
           const progress = cap ? Math.min(100, (count / cap) * 100) : 0;
+          const cardDelay = index * 90;
 
           return (
             <div key={type.id} className={`rounded-2xl border border-zinc-200 p-5 ${color.cardBg}`}>
@@ -66,32 +62,21 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
               </div>
 
               <div className="mt-4 flex items-end gap-1.5">
-                <CountUpNumber value={count} className="text-3xl font-bold leading-none text-zinc-900" />
+                <FadeInNumber
+                  value={count}
+                  delayMs={cardDelay}
+                  className="text-3xl font-bold leading-none text-zinc-900"
+                />
                 {cap && <span className="pb-0.5 text-sm text-zinc-400">de {cap} al año</span>}
-                <span className="group relative ml-0.5 mb-1 inline-flex">
-                  <button
-                    type="button"
-                    aria-label={`Por qué este intervalo para ${type.name.toLowerCase()}`}
-                    className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] leading-none text-zinc-400 hover:text-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
-                  >
-                    ⓘ
-                  </button>
-                  <span
-                    role="tooltip"
-                    className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-48 -translate-x-1/2 rounded-lg bg-zinc-900 px-2.5 py-1.5 text-xs leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
-                  >
-                    {INTERVAL_REASON[type.id]}
-                  </span>
-                </span>
               </div>
 
               {cap && (
-                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
-                  <div
-                    className={`h-full rounded-full ${color.barBg}`}
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
+                <ProgressBar
+                  progress={progress}
+                  delayMs={cardDelay + 700}
+                  className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100"
+                  barClassName={color.barBg}
+                />
               )}
 
               <p className="mt-3 text-xs text-zinc-500">{encouragingLabel(count, cap)}</p>
@@ -99,9 +84,11 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
 
               <div className="mt-3 border-t border-zinc-100 pt-3">
                 <div className="flex items-baseline gap-1.5">
-                  <span className={`text-xl font-bold leading-none ${color.text}`}>
-                    {totalCount * PEOPLE_HELPED_PER_DONATION}
-                  </span>
+                  <FadeInNumber
+                    value={totalCount * PEOPLE_HELPED_PER_DONATION}
+                    delayMs={cardDelay + 40}
+                    className={`text-xl font-bold leading-none ${color.text}`}
+                  />
                   <span className="text-xs text-zinc-500">personas ayudadas</span>
                 </div>
                 <p className="mt-0.5 text-[11px] text-zinc-400">

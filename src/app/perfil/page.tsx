@@ -16,7 +16,6 @@ export default function PerfilPage() {
       <BookingHeader />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:py-12">
         <p className="text-2xl font-semibold text-zinc-900">Hola, {DONOR_NAME}</p>
-        <h1 className="mt-1 text-base font-medium text-zinc-600">Pluviómetro {currentYear}</h1>
 
         <section className="mt-6 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
           <Pluviometro donations={donations} year={currentYear} />
