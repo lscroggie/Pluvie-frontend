@@ -8,7 +8,6 @@ import {
 } from "@/lib/donor-profile/data";
 import type { Donation } from "@/lib/donor-profile/types";
 import { FadeInNumber } from "./FadeInNumber";
-import { ProgressBar } from "./ProgressBar";
 import { DONATION_TYPE_COLOR } from "./donationColors";
 import { DropIcon } from "./DropIcon";
 
@@ -57,7 +56,6 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
           const totalCount = totalCounts[type.id];
           const cap = REFERENCE_CAPS[type.id];
           const color = DONATION_TYPE_COLOR[type.id];
-          const progress = cap ? Math.min(100, (count / cap) * 100) : 0;
           const cardDelay = index * 90;
 
           return (
@@ -80,24 +78,15 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
                 {cap && <span className="pb-0.5 text-sm text-zinc-400">de {cap} al año</span>}
               </div>
 
-              {cap && (
-                <ProgressBar
-                  progress={progress}
-                  delayMs={cardDelay + 700}
-                  className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100"
-                  barClassName={color.barBg}
-                />
-              )}
-
-              <p className="mt-3 text-xs text-zinc-500">{encouragingLabel(count, cap)}</p>
+              <p className="mt-4 text-xs text-zinc-500">{encouragingLabel(count, cap)}</p>
               <p className="mt-1 text-xs text-zinc-400">{type.description}</p>
 
-              <div className="mt-3 border-t border-zinc-100 pt-3">
+              <div className="mt-4 border-t border-zinc-100 pt-4">
                 <div className="flex items-baseline gap-1.5">
                   <FadeInNumber
                     value={totalCount * PEOPLE_HELPED_PER_DONATION}
                     delayMs={cardDelay + 40}
-                    className={`text-xl font-bold leading-none ${color.text}`}
+                    className={`text-2xl font-bold leading-none ${color.text}`}
                   />
                   <span className="text-xs text-zinc-500">personas ayudadas</span>
                 </div>
