@@ -47,7 +47,7 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
         </span>
       )}
 
-      <h2 className="mt-5 text-sm font-semibold uppercase tracking-wide text-brand-violet">
+      <h2 className="mt-5 text-lg font-semibold text-zinc-900">
         Tu Pluviómetro
       </h2>
 
