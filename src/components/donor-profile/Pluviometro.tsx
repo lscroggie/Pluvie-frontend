@@ -28,10 +28,16 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
   const counts = getYearlyCounts(donations, year);
   const totalCounts = getTotalCounts(donations);
   const streak = getConsecutiveYearStreak(donations, year);
+  const totalYear = counts["sangre-entera"] + counts.plaquetas + counts.plasma;
 
   return (
     <div>
-      <p className="text-sm text-zinc-500">
+      <div className="flex items-baseline gap-2">
+        <FadeInNumber value={totalYear} className="text-4xl font-bold leading-none text-zinc-900" />
+        <span className="text-sm text-zinc-500">donaciones en {year}</span>
+      </div>
+
+      <p className="mt-2 text-sm text-zinc-500">
         Tu actividad de donación correspondiente a {year}. Los topes son valores de
         referencia orientativos, no un límite: podés donar más si tu centro lo habilita.
       </p>
@@ -41,7 +47,11 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
         </span>
       )}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+      <h2 className="mt-5 text-sm font-semibold uppercase tracking-wide text-brand-violet">
+        Tu Pluviómetro
+      </h2>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
         {donationTypes.map((type, index) => {
           const count = counts[type.id];
           const totalCount = totalCounts[type.id];
