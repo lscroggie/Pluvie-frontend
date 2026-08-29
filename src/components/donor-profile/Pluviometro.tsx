@@ -59,7 +59,7 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
           const cardDelay = index * 90;
 
           return (
-            <div key={type.id} className={`rounded-2xl border border-zinc-200 p-5 ${color.cardBg}`}>
+            <div key={type.id} className={`flex h-full flex-col rounded-2xl border border-zinc-200 p-5 ${color.cardBg}`}>
               <div className="flex items-center gap-3">
                 <span
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${color.iconBg}`}
@@ -81,7 +81,7 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
               <p className="mt-4 text-xs text-zinc-500">{encouragingLabel(count, cap)}</p>
               <p className="mt-1 text-xs text-zinc-400">{type.description}</p>
 
-              <div className="mt-4 border-t border-zinc-100 pt-4">
+              <div className="mt-auto border-t border-zinc-100 pt-4">
                 <div className="flex items-baseline gap-1.5">
                   <FadeInNumber
                     value={totalCount * PEOPLE_HELPED_PER_DONATION}
