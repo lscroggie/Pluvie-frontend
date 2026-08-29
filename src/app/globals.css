@@ -10,6 +10,7 @@
   --color-brand-green: #00bb94;
   --color-brand-coral: #ff7675;
   --color-brand-amber: #f0a93a;
+  --color-brand-charcoal: #2d3436;
 }
 
 @theme inline {
@@ -23,6 +24,7 @@
   --color-brand-green: var(--color-brand-green);
   --color-brand-coral: var(--color-brand-coral);
   --color-brand-amber: var(--color-brand-amber);
+  --color-brand-charcoal: var(--color-brand-charcoal);
 }
 
 @media (prefers-color-scheme: dark) {
