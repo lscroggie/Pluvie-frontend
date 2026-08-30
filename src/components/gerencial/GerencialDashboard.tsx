@@ -10,6 +10,7 @@ import {
   serializePeriod,
 } from "@/lib/gerencial/data";
 import type { Period } from "@/lib/gerencial/types";
+import { AlertsSection } from "./AlertsSection";
 import { AttendanceSection } from "./AttendanceSection";
 import { DonationsBarChart } from "./DonationsBarChart";
 import { DonationTypeBreakdown } from "./DonationTypeBreakdown";
@@ -44,6 +45,8 @@ export function GerencialDashboard() {
           <ExportMenu viewModel={viewModel} institutionName={INSTITUTION_NAME} />
         </div>
       </div>
+
+      <AlertsSection alerts={viewModel.alerts} />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard

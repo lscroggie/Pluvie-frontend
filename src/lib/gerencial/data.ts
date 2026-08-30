@@ -1,6 +1,7 @@
 import { PEOPLE_HELPED_PER_DONATION } from "@/lib/donor-profile/data";
 import type { DonationTypeId } from "@/lib/donor-booking/types";
 import type {
+  Alert,
   AttendanceBreakdown,
   ChartPoint,
   DashboardViewModel,
@@ -10,6 +11,17 @@ import type {
   Period,
   PeriodOption,
 } from "./types";
+
+// Umbrales de alerta gerencial: por debajo de esto se considera variación
+// normal y no se muestra alerta.
+const ABSENTEEISM_ALERT_THRESHOLD_PP = 10;
+const DONATION_DROP_ALERT_THRESHOLD_PCT = 20;
+
+const DONATION_TYPE_LABELS: Record<DonationTypeId, string> = {
+  "sangre-entera": "Glóbulos rojos",
+  plaquetas: "Plaquetas",
+  plasma: "Plasma",
+};
 
 // Datos mock del dashboard gerencial, mes a mes. En producción vendrían
 // agregados desde el backend por institución (Pluvie no compara instituciones
@@ -132,11 +144,44 @@ function sumDonationTypeCounts(months: MonthlyGerencialData[]): Record<DonationT
 }
 
 function toBreakdown(counts: Record<DonationTypeId, number>): DonationTypeBreakdownItem[] {
-  return [
-    { id: "sangre-entera", label: "Glóbulos rojos", count: counts["sangre-entera"] },
-    { id: "plaquetas", label: "Plaquetas", count: counts.plaquetas },
-    { id: "plasma", label: "Plasma", count: counts.plasma },
-  ];
+  return (Object.keys(DONATION_TYPE_LABELS) as DonationTypeId[]).map((id) => ({
+    id,
+    label: DONATION_TYPE_LABELS[id],
+    count: counts[id],
+  }));
+}
+
+function computeAlerts(month: MonthlyGerencialData, previous: MonthlyGerencialData | undefined): Alert[] {
+  if (!previous) return [];
+
+  const alerts: Alert[] = [];
+
+  const currentAbsenteeismPct = (1 - month.completedDonations / month.scheduledAppointments) * 100;
+  const previousAbsenteeismPct = (1 - previous.completedDonations / previous.scheduledAppointments) * 100;
+  const absenteeismDeltaPp = currentAbsenteeismPct - previousAbsenteeismPct;
+
+  if (absenteeismDeltaPp > ABSENTEEISM_ALERT_THRESHOLD_PP) {
+    alerts.push({
+      id: "absenteeism-spike",
+      message: `La tasa de ausentismo subió ${Math.round(absenteeismDeltaPp)}pp vs. ${previous.monthLabel} (de ${Math.round(previousAbsenteeismPct)}% a ${Math.round(currentAbsenteeismPct)}%).`,
+    });
+  }
+
+  for (const id of Object.keys(DONATION_TYPE_LABELS) as DonationTypeId[]) {
+    const currentCount = month.donationTypeCounts[id];
+    const previousCount = previous.donationTypeCounts[id];
+    if (previousCount === 0) continue;
+
+    const dropPct = ((previousCount - currentCount) / previousCount) * 100;
+    if (dropPct > DONATION_DROP_ALERT_THRESHOLD_PCT) {
+      alerts.push({
+        id: `donation-drop-${id}`,
+        message: `Las donaciones de ${DONATION_TYPE_LABELS[id]} cayeron ${Math.round(dropPct)}% vs. ${previous.monthLabel} (de ${previousCount} a ${currentCount}).`,
+      });
+    }
+  }
+
+  return alerts;
 }
 
 function toAttendance(scheduled: number, completed: number): AttendanceBreakdown {
@@ -178,6 +223,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
       chart: { title: "Donaciones por semana", points: month.weeklyDonations },
       donationTypeBreakdown: toBreakdown(month.donationTypeCounts),
       attendance: toAttendance(month.scheduledAppointments, month.completedDonations),
+      alerts: computeAlerts(month, previous),
     };
   }
 
@@ -203,5 +249,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
     chart: { title: "Donaciones por mes", points },
     donationTypeBreakdown: toBreakdown(sumDonationTypeCounts(yearMonths)),
     attendance: toAttendance(scheduledTotal, completedTotal),
+    // No hay un año anterior completo en los datos mock con el que comparar.
+    alerts: [],
   };
 }

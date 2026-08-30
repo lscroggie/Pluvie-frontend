@@ -46,6 +46,11 @@ export type KpiValue = {
   delta?: KpiDelta;
 };
 
+export type Alert = {
+  id: string;
+  message: string;
+};
+
 export type DashboardViewModel = {
   periodLabel: string;
   kpis: {
@@ -60,4 +65,5 @@ export type DashboardViewModel = {
   };
   donationTypeBreakdown: DonationTypeBreakdownItem[];
   attendance: AttendanceBreakdown;
+  alerts: Alert[];
 };
