@@ -22,6 +22,10 @@ function totalDonations(viewModel: DashboardViewModel): number {
   return viewModel.donationTypeBreakdown.reduce((sum, item) => sum + item.count, 0);
 }
 
+function attendancePct(count: number, total: number): string {
+  return total === 0 ? "0%" : `${Math.round((count / total) * 100)}%`;
+}
+
 export function exportToExcel(viewModel: DashboardViewModel, institutionName: string): void {
   const total = totalDonations(viewModel);
   const rows: (string | number)[][] = [
@@ -44,11 +48,12 @@ export function exportToExcel(viewModel: DashboardViewModel, institutionName: st
       total === 0 ? "0%" : `${Math.round((item.count / total) * 100)}%`,
     ]),
     [],
-    ["Turnos y asistencia"],
-    ["Indicador", "Valor"],
-    ["Turnos otorgados", viewModel.attendance.grantedAppointments],
-    ["Turnos efectivamente donados", viewModel.attendance.completedDonations],
-    ["% de ausentismo", `${Math.round(viewModel.attendance.absenteeismRate * 100)}%`],
+    ["Turnos: desglose de estados"],
+    ["Estado", "Cantidad", "Porcentaje"],
+    ["Turnos otorgados", viewModel.attendance.grantedAppointments, "100%"],
+    ["Ausentismo", viewModel.attendance.absenteeismCount, attendancePct(viewModel.attendance.absenteeismCount, viewModel.attendance.grantedAppointments)],
+    ["Asistió pero no pudo donar", viewModel.attendance.notEligibleCount, attendancePct(viewModel.attendance.notEligibleCount, viewModel.attendance.grantedAppointments)],
+    ["Donación efectiva", viewModel.attendance.effectiveDonations, attendancePct(viewModel.attendance.effectiveDonations, viewModel.attendance.grantedAppointments)],
   ];
 
   const sheet = utils.aoa_to_sheet(rows);
@@ -99,11 +104,24 @@ export function exportToPdf(viewModel: DashboardViewModel, institutionName: stri
 
   autoTable(doc, {
     startY: afterBreakdown + 10,
-    head: [["Turnos y asistencia", "Valor"]],
+    head: [["Turnos: desglose de estados", "Cantidad", "Porcentaje"]],
     body: [
-      ["Turnos otorgados", String(viewModel.attendance.grantedAppointments)],
-      ["Turnos efectivamente donados", String(viewModel.attendance.completedDonations)],
-      ["% de ausentismo", `${Math.round(viewModel.attendance.absenteeismRate * 100)}%`],
+      ["Turnos otorgados", String(viewModel.attendance.grantedAppointments), "100%"],
+      [
+        "Ausentismo",
+        String(viewModel.attendance.absenteeismCount),
+        attendancePct(viewModel.attendance.absenteeismCount, viewModel.attendance.grantedAppointments),
+      ],
+      [
+        "Asistió pero no pudo donar",
+        String(viewModel.attendance.notEligibleCount),
+        attendancePct(viewModel.attendance.notEligibleCount, viewModel.attendance.grantedAppointments),
+      ],
+      [
+        "Donación efectiva",
+        String(viewModel.attendance.effectiveDonations),
+        attendancePct(viewModel.attendance.effectiveDonations, viewModel.attendance.grantedAppointments),
+      ],
     ],
   });
 

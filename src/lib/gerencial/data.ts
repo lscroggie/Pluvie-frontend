@@ -17,6 +17,12 @@ import type {
 const ABSENTEEISM_ALERT_THRESHOLD_PP = 10;
 const DONATION_DROP_ALERT_THRESHOLD_PCT = 20;
 
+// Mock: de los turnos otorgados que no terminan en donación efectiva, esta
+// proporción corresponde a "asistió pero no pudo donar" (motivo clínico) y
+// el resto a ausentismo real. No existe hoy este desglose en los datos
+// históricos, así que se estima con esta proporción fija.
+const NOT_ELIGIBLE_SHARE_OF_GAP = 0.2;
+
 const DONATION_TYPE_LABELS: Record<DonationTypeId, string> = {
   "sangre-entera": "Glóbulos rojos",
   plaquetas: "Plaquetas",
@@ -68,29 +74,33 @@ function buildMonth(
   year: number,
   donationsCount: number,
   scheduledAppointments: number,
-  attendanceRate: number,
 ): MonthlyGerencialData {
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
+  const gap = scheduledAppointments - donationsCount;
+  const notEligibleCount = Math.round(gap * NOT_ELIGIBLE_SHARE_OF_GAP);
+  const absenteeismCount = gap - notEligibleCount;
+
   return {
     monthKey,
     monthLabel: `${MONTH_NAMES[monthIndex]} ${year}`,
     donationsCount,
     scheduledAppointments,
-    completedDonations: Math.round(scheduledAppointments * attendanceRate),
+    absenteeismCount,
+    notEligibleCount,
     weeklyDonations: splitIntoWeeks(donationsCount),
     donationTypeCounts: splitByDonationType(donationsCount),
   };
 }
 
 export const monthlyData: MonthlyGerencialData[] = [
-  buildMonth(0, 2026, 250, 430, 0.86),
-  buildMonth(1, 2026, 270, 450, 0.84),
-  buildMonth(2, 2026, 310, 470, 0.87),
-  buildMonth(3, 2026, 295, 460, 0.85),
-  buildMonth(4, 2026, 330, 490, 0.88),
-  buildMonth(5, 2026, 360, 505, 0.87),
-  buildMonth(6, 2026, 368, 517, 0.86),
-  buildMonth(7, 2026, 412, 548, 0.89),
+  buildMonth(0, 2026, 250, 430),
+  buildMonth(1, 2026, 270, 450),
+  buildMonth(2, 2026, 310, 470),
+  buildMonth(3, 2026, 295, 460),
+  buildMonth(4, 2026, 330, 490),
+  buildMonth(5, 2026, 360, 505),
+  buildMonth(6, 2026, 368, 517),
+  buildMonth(7, 2026, 412, 548),
 ];
 
 // Mock: en producción vendría del perfil de la institución logueada.
@@ -156,8 +166,8 @@ function computeAlerts(month: MonthlyGerencialData, previous: MonthlyGerencialDa
 
   const alerts: Alert[] = [];
 
-  const currentAbsenteeismPct = (1 - month.completedDonations / month.scheduledAppointments) * 100;
-  const previousAbsenteeismPct = (1 - previous.completedDonations / previous.scheduledAppointments) * 100;
+  const currentAbsenteeismPct = (month.absenteeismCount / month.scheduledAppointments) * 100;
+  const previousAbsenteeismPct = (previous.absenteeismCount / previous.scheduledAppointments) * 100;
   const absenteeismDeltaPp = currentAbsenteeismPct - previousAbsenteeismPct;
 
   if (absenteeismDeltaPp > ABSENTEEISM_ALERT_THRESHOLD_PP) {
@@ -184,11 +194,12 @@ function computeAlerts(month: MonthlyGerencialData, previous: MonthlyGerencialDa
   return alerts;
 }
 
-function toAttendance(scheduled: number, completed: number): AttendanceBreakdown {
+function toAttendance(scheduled: number, absenteeismCount: number, notEligibleCount: number, effectiveDonations: number): AttendanceBreakdown {
   return {
     grantedAppointments: scheduled,
-    completedDonations: completed,
-    absenteeismRate: scheduled === 0 ? 0 : 1 - completed / scheduled,
+    absenteeismCount,
+    notEligibleCount,
+    effectiveDonations,
   };
 }
 
@@ -197,8 +208,8 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
     const index = monthlyData.findIndex((month) => month.monthKey === period.monthKey);
     const month = monthlyData[index];
     const previous = monthlyData[index - 1];
-    const attendanceRate = month.completedDonations / month.scheduledAppointments;
-    const previousAttendanceRate = previous ? previous.completedDonations / previous.scheduledAppointments : undefined;
+    const attendanceRate = 1 - month.absenteeismCount / month.scheduledAppointments;
+    const previousAttendanceRate = previous ? 1 - previous.absenteeismCount / previous.scheduledAppointments : undefined;
 
     return {
       periodLabel: month.monthLabel,
@@ -222,7 +233,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
       },
       chart: { title: "Donaciones por semana", points: month.weeklyDonations },
       donationTypeBreakdown: toBreakdown(month.donationTypeCounts),
-      attendance: toAttendance(month.scheduledAppointments, month.completedDonations),
+      attendance: toAttendance(month.scheduledAppointments, month.absenteeismCount, month.notEligibleCount, month.donationsCount),
       alerts: computeAlerts(month, previous),
     };
   }
@@ -230,7 +241,8 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
   const yearMonths = monthlyData.filter((month) => month.monthKey.startsWith(String(period.year)));
   const donationsTotal = yearMonths.reduce((sum, month) => sum + month.donationsCount, 0);
   const scheduledTotal = yearMonths.reduce((sum, month) => sum + month.scheduledAppointments, 0);
-  const completedTotal = yearMonths.reduce((sum, month) => sum + month.completedDonations, 0);
+  const absenteeismTotal = yearMonths.reduce((sum, month) => sum + month.absenteeismCount, 0);
+  const notEligibleTotal = yearMonths.reduce((sum, month) => sum + month.notEligibleCount, 0);
 
   const monthlyTotalsByIndex = new Map(yearMonths.map((month) => [Number(month.monthKey.slice(5, 7)) - 1, month.donationsCount]));
   const points: ChartPoint[] = MONTH_ABBR.map((label, index) => ({
@@ -244,11 +256,13 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
       donationsThisMonth: { value: donationsTotal },
       peopleHelped: { value: donationsTotal * PEOPLE_HELPED_PER_DONATION },
       scheduledAppointments: { value: scheduledTotal },
-      attendanceRate: { value: scheduledTotal === 0 ? 0 : Math.round((completedTotal / scheduledTotal) * 100) },
+      attendanceRate: {
+        value: scheduledTotal === 0 ? 0 : Math.round((1 - absenteeismTotal / scheduledTotal) * 100),
+      },
     },
     chart: { title: "Donaciones por mes", points },
     donationTypeBreakdown: toBreakdown(sumDonationTypeCounts(yearMonths)),
-    attendance: toAttendance(scheduledTotal, completedTotal),
+    attendance: toAttendance(scheduledTotal, absenteeismTotal, notEligibleTotal, donationsTotal),
     // No hay un año anterior completo en los datos mock con el que comparar.
     alerts: [],
   };

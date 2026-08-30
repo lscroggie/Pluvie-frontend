@@ -13,18 +13,24 @@ export type DonationTypeBreakdownItem = {
 
 export type BrandAccent = "violet" | "green" | "coral";
 
+// Los 3 estados reales de un turno otorgado (mutuamente excluyentes):
+// ausentismo (no vino), asistió pero no pudo donar (motivo clínico evaluado
+// por el staff), y donación efectiva (único estado que dispara impacto 3x
+// y nivel Donate).
 export type AttendanceBreakdown = {
   grantedAppointments: number;
-  completedDonations: number;
-  absenteeismRate: number;
+  absenteeismCount: number;
+  notEligibleCount: number;
+  effectiveDonations: number;
 };
 
 export type MonthlyGerencialData = {
   monthKey: string; // "2026-08"
   monthLabel: string; // "Agosto 2026"
-  donationsCount: number;
+  donationsCount: number; // donación efectiva
   scheduledAppointments: number;
-  completedDonations: number;
+  absenteeismCount: number;
+  notEligibleCount: number;
   weeklyDonations: ChartPoint[];
   donationTypeCounts: Record<DonationTypeId, number>;
 };
