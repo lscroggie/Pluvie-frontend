@@ -9,11 +9,13 @@ import {
   parsePeriod,
   serializePeriod,
 } from "@/lib/gerencial/data";
+import { donorLevelCounts } from "@/lib/gerencial/donorLevels";
 import type { Period } from "@/lib/gerencial/types";
 import { AlertsSection } from "./AlertsSection";
 import { AttendanceSection } from "./AttendanceSection";
 import { DonationsBarChart } from "./DonationsBarChart";
 import { DonationTypeBreakdown } from "./DonationTypeBreakdown";
+import { DonorLevelsChart } from "./DonorLevelsChart";
 import { ExportMenu } from "./ExportMenu";
 import { KpiCard } from "./KpiCard";
 import { PeriodSelector } from "./PeriodSelector";
@@ -85,6 +87,10 @@ export function GerencialDashboard() {
 
       <section className="mt-6">
         <AttendanceSection data={viewModel.attendance} />
+      </section>
+
+      <section className="mt-6">
+        <DonorLevelsChart items={donorLevelCounts} />
       </section>
     </div>
   );

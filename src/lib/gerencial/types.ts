@@ -51,6 +51,14 @@ export type Alert = {
   message: string;
 };
 
+export type DonorLevelId = "bronce" | "plata" | "oro" | "diamante";
+
+export type DonorLevelBreakdownItem = {
+  id: DonorLevelId;
+  label: string;
+  count: number;
+};
+
 export type DashboardViewModel = {
   periodLabel: string;
   kpis: {
