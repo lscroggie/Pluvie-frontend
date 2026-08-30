@@ -109,6 +109,23 @@ export const INSTITUTION_NAME = "Swiss Medical";
 export const CURRENT_MONTH_KEY = monthlyData[monthlyData.length - 1].monthKey;
 const CURRENT_YEAR = Number(CURRENT_MONTH_KEY.slice(0, 4));
 
+// Mock: hoy simula "se actualizó ahora" con la hora del sistema al cargar la
+// página. Cuando se conecte al backend real, reemplazar por el timestamp de
+// la última sincronización de datos (ej. devuelto por la API).
+export function getLastSyncedAt(): Date {
+  return new Date();
+}
+
+export function formatLastSyncedAt(date: Date): string {
+  return date.toLocaleString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function serializePeriod(period: Period): string {
   if (period.kind === "historic") return "historic";
   return period.kind === "month" ? `month:${period.monthKey}` : `year:${period.year}`;

@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import {
   CURRENT_MONTH_KEY,
+  formatLastSyncedAt,
   getDashboardViewModel,
+  getLastSyncedAt,
   getPeriodOptions,
   INSTITUTION_NAME,
   parsePeriod,
@@ -24,6 +26,7 @@ const periodOptions = getPeriodOptions();
 
 export function GerencialDashboard() {
   const [period, setPeriod] = useState<Period>({ kind: "month", monthKey: CURRENT_MONTH_KEY });
+  const [lastSyncedAt] = useState(() => getLastSyncedAt());
   const viewModel = useMemo(() => getDashboardViewModel(period), [period]);
 
   return (
@@ -38,13 +41,16 @@ export function GerencialDashboard() {
           </h1>
           <p className="mt-1 text-sm text-zinc-500">Vista general · {viewModel.periodLabel}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <PeriodSelector
-            options={periodOptions}
-            value={serializePeriod(period)}
-            onChange={(value) => setPeriod(parsePeriod(value))}
-          />
-          <ExportMenu viewModel={viewModel} institutionName={INSTITUTION_NAME} />
+        <div className="flex flex-col items-end gap-1.5">
+          <div className="flex items-center gap-3">
+            <PeriodSelector
+              options={periodOptions}
+              value={serializePeriod(period)}
+              onChange={(value) => setPeriod(parsePeriod(value))}
+            />
+            <ExportMenu viewModel={viewModel} institutionName={INSTITUTION_NAME} />
+          </div>
+          <span className="text-xs text-zinc-400">Datos actualizados al {formatLastSyncedAt(lastSyncedAt)}</span>
         </div>
       </div>
 
