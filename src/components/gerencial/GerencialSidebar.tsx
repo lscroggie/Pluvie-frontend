@@ -1,14 +1,20 @@
+"use client";
+
 import Link from "next/link";
-import { BuildingIcon, DashboardIcon, DropIcon, GearIcon, ReportsIcon } from "./icons";
+import { usePathname } from "next/navigation";
+import { BuildingIcon, ClockIcon, DashboardIcon, DropIcon, GearIcon, ReportsIcon } from "./icons";
 
 const navItems = [
   { label: "Dashboard", href: "/gerencial", Icon: DashboardIcon },
   { label: "Sedes", href: null, Icon: BuildingIcon },
   { label: "Reportes", href: null, Icon: ReportsIcon },
   { label: "Configuración", href: null, Icon: GearIcon },
+  { label: "Configuración de turnos", href: "/gerencial/configuracion-turnos", Icon: ClockIcon },
 ];
 
 export function GerencialSidebar() {
+  const pathname = usePathname();
+
   return (
     <nav className="flex w-60 shrink-0 flex-col gap-1 bg-brand-charcoal px-3 py-6">
       <div className="mb-6 flex items-center gap-2 px-3">
@@ -26,7 +32,9 @@ export function GerencialSidebar() {
           <Link
             key={label}
             href={href}
-            className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2.5 text-sm font-semibold text-white"
+            className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold ${
+              pathname === href ? "bg-white/10 text-white" : "text-zinc-300 hover:bg-white/5 hover:text-white"
+            }`}
           >
             <Icon className="h-4 w-4 text-brand-violet" />
             {label}
