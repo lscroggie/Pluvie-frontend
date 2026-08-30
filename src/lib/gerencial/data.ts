@@ -198,6 +198,9 @@ function computeAlerts(month: MonthlyGerencialData, previous: MonthlyGerencialDa
     alerts.push({
       id: "absenteeism-spike",
       message: `La tasa de ausentismo subió ${Math.round(absenteeismDeltaPp)} puntos vs. ${previous.monthLabel} (de ${Math.round(previousAbsenteeismPct)}% a ${Math.round(currentAbsenteeismPct)}%).`,
+      shortLabel: "ausentismo",
+      detailTitle: `Ausentismo por semana — ${month.monthLabel}`,
+      weeklyBreakdown: splitIntoWeeks(month.absenteeismCount),
     });
   }
 
@@ -211,6 +214,9 @@ function computeAlerts(month: MonthlyGerencialData, previous: MonthlyGerencialDa
       alerts.push({
         id: `donation-drop-${id}`,
         message: `Las donaciones de ${DONATION_TYPE_LABELS[id]} cayeron ${Math.round(dropPct)}% vs. ${previous.monthLabel} (de ${previousCount} a ${currentCount}).`,
+        shortLabel: `donaciones de ${DONATION_TYPE_LABELS[id].toLowerCase()}`,
+        detailTitle: `${DONATION_TYPE_LABELS[id]} por semana — ${month.monthLabel}`,
+        weeklyBreakdown: splitIntoWeeks(currentCount),
       });
     }
   }
@@ -257,6 +263,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
 
     return {
       periodLabel: month.monthLabel,
+      previousPeriodLabel: previous?.monthLabel.split(" ")[0].toLowerCase(),
       kpis: {
         donationsThisMonth: {
           value: month.donationsCount,
@@ -311,4 +318,31 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
     // Un histórico no tiene un "período anterior" con el que compararse.
     alerts: [],
   };
+}
+
+export function buildExecutiveSummary(viewModel: DashboardViewModel, period: Period): string {
+  const prefix = period.kind === "month" ? "Este mes" : period.kind === "year" ? "Este año" : "En total";
+  const donations = viewModel.kpis.donationsThisMonth.value.toLocaleString("es-AR");
+
+  let sentence = `${prefix}: ${donations} donaciones`;
+
+  const delta = viewModel.kpis.donationsThisMonth.delta;
+  if (delta && viewModel.previousPeriodLabel) {
+    if (delta.direction === "neutral") {
+      sentence += `, sin cambios respecto a ${viewModel.previousPeriodLabel}`;
+    } else {
+      const comparative = delta.direction === "up" ? "más" : "menos";
+      sentence += `, ${delta.text} ${comparative} que ${viewModel.previousPeriodLabel}`;
+    }
+  }
+
+  if (viewModel.alerts.length > 0) {
+    const labels = viewModel.alerts.map((alert) => alert.shortLabel);
+    sentence +=
+      viewModel.alerts.length === 1
+        ? `, con una alerta activa en ${labels[0]}`
+        : `, con ${viewModel.alerts.length} alertas activas (${labels.join(", ")})`;
+  }
+
+  return `${sentence}.`;
 }

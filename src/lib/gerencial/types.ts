@@ -55,6 +55,9 @@ export type KpiValue = {
 export type Alert = {
   id: string;
   message: string;
+  shortLabel: string; // versión corta en minúscula, para insertar en el resumen ejecutivo (ej. "ausentismo")
+  detailTitle: string; // título del desglose al expandir la alerta (ej. "Ausentismo por semana — Julio 2026")
+  weeklyBreakdown: ChartPoint[];
 };
 
 export type DonorLevelId = "bronce" | "plata" | "oro" | "diamante";
@@ -67,6 +70,9 @@ export type DonorLevelBreakdownItem = {
 
 export type DashboardViewModel = {
   periodLabel: string;
+  // Nombre del período contra el que se compara, listo para insertar en una
+  // frase (ej. "julio"). undefined cuando no hay comparación válida.
+  previousPeriodLabel?: string;
   kpis: {
     donationsThisMonth: KpiValue;
     peopleHelped: KpiValue;

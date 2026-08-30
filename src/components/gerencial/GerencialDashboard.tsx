@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
+  buildExecutiveSummary,
   CURRENT_MONTH_KEY,
   formatLastSyncedAt,
   getDashboardViewModel,
@@ -18,6 +19,7 @@ import { AttendanceSection } from "./AttendanceSection";
 import { DonationsBarChart } from "./DonationsBarChart";
 import { DonationTypeBreakdown } from "./DonationTypeBreakdown";
 import { DonorLevelsChart } from "./DonorLevelsChart";
+import { ExecutiveSummary } from "./ExecutiveSummary";
 import { ExportMenu } from "./ExportMenu";
 import { KpiCard } from "./KpiCard";
 import { PeriodSelector } from "./PeriodSelector";
@@ -50,6 +52,8 @@ export function GerencialDashboard() {
           <ExportMenu viewModel={viewModel} institutionName={INSTITUTION_NAME} />
         </div>
       </div>
+
+      <ExecutiveSummary text={buildExecutiveSummary(viewModel, period)} />
 
       <AlertsSection alerts={viewModel.alerts} />
 
