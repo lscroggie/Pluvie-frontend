@@ -53,13 +53,19 @@ export function GerencialDashboard() {
         </div>
       </div>
 
-      <ExecutiveSummary text={buildExecutiveSummary(viewModel, period)} />
+      {period.kind !== "historic" && <ExecutiveSummary text={buildExecutiveSummary(viewModel, period)} />}
 
       <AlertsSection alerts={viewModel.alerts} />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          label="Donaciones este mes"
+          label={
+            period.kind === "month"
+              ? "Donaciones este mes"
+              : period.kind === "year"
+                ? "Donaciones este año"
+                : "Donaciones totales"
+          }
           value={String(viewModel.kpis.donationsThisMonth.value)}
           delta={viewModel.kpis.donationsThisMonth.delta}
           accent="charcoal"
