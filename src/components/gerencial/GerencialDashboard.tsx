@@ -41,16 +41,13 @@ export function GerencialDashboard() {
           </h1>
           <p className="mt-1 text-sm text-zinc-500">Vista general · {viewModel.periodLabel}</p>
         </div>
-        <div className="flex flex-col items-end gap-1.5">
-          <div className="flex items-center gap-3">
-            <PeriodSelector
-              options={periodOptions}
-              value={serializePeriod(period)}
-              onChange={(value) => setPeriod(parsePeriod(value))}
-            />
-            <ExportMenu viewModel={viewModel} institutionName={INSTITUTION_NAME} />
-          </div>
-          <span className="text-xs text-zinc-400">Datos actualizados al {formatLastSyncedAt(lastSyncedAt)}</span>
+        <div className="flex items-center gap-3">
+          <PeriodSelector
+            options={periodOptions}
+            value={serializePeriod(period)}
+            onChange={(value) => setPeriod(parsePeriod(value))}
+          />
+          <ExportMenu viewModel={viewModel} institutionName={INSTITUTION_NAME} />
         </div>
       </div>
 
@@ -100,6 +97,10 @@ export function GerencialDashboard() {
           <DonorLevelsChart items={donorLevelCounts} />
         </section>
       )}
+
+      <footer className="mt-8 text-xs text-zinc-400">
+        Datos actualizados al {formatLastSyncedAt(lastSyncedAt)}
+      </footer>
     </div>
   );
 }

@@ -9,12 +9,12 @@ export function DonationsBarChart({ title, points }: { title: string; points: Ch
         {title}
       </h2>
 
-      <div className="mt-6 flex h-48 items-end gap-2">
+      <div className="mt-6 flex h-48 gap-2">
         {points.map((point) => {
           const heightPct = (point.count / max) * 100;
           return (
             <div key={point.label} className="group flex flex-1 flex-col items-center">
-              <div className="flex h-full w-full items-end">
+              <div className="flex w-full flex-1 items-end">
                 <div
                   className="w-full rounded-t-[4px] bg-brand-violet transition-opacity group-hover:opacity-80"
                   style={{ height: `${heightPct}%` }}
