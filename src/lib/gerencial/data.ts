@@ -156,7 +156,7 @@ function computeDelta(current: number, previous: number | undefined, unit: "pct"
     const diff = current - previous;
     const rounded = Math.round(Math.abs(diff));
     if (rounded === 0) return { direction: "neutral", text: "Sin cambios" };
-    return { direction: diff >= 0 ? "up" : "down", text: `${rounded}pp` };
+    return { direction: diff >= 0 ? "up" : "down", text: `${rounded} ${rounded === 1 ? "punto" : "puntos"}` };
   }
 
   if (previous === 0) return undefined;
@@ -197,7 +197,7 @@ function computeAlerts(month: MonthlyGerencialData, previous: MonthlyGerencialDa
   if (absenteeismDeltaPp > ABSENTEEISM_ALERT_THRESHOLD_PP) {
     alerts.push({
       id: "absenteeism-spike",
-      message: `La tasa de ausentismo subió ${Math.round(absenteeismDeltaPp)}pp vs. ${previous.monthLabel} (de ${Math.round(previousAbsenteeismPct)}% a ${Math.round(currentAbsenteeismPct)}%).`,
+      message: `La tasa de ausentismo subió ${Math.round(absenteeismDeltaPp)} puntos vs. ${previous.monthLabel} (de ${Math.round(previousAbsenteeismPct)}% a ${Math.round(currentAbsenteeismPct)}%).`,
     });
   }
 
