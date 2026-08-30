@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BuildingIcon, ClockIcon, DashboardIcon, DropIcon, GearIcon, ReportsIcon } from "./icons";
+import { ClockIcon, DashboardIcon, DropIcon, GearIcon } from "./icons";
 
 const navItems = [
   { label: "Dashboard", href: "/gerencial", Icon: DashboardIcon },
-  { label: "Sedes", href: null, Icon: BuildingIcon },
-  { label: "Reportes", href: null, Icon: ReportsIcon },
   { label: "Configuración", href: null, Icon: GearIcon },
   { label: "Configuración de turnos", href: "/gerencial/configuracion-turnos", Icon: ClockIcon },
 ];
