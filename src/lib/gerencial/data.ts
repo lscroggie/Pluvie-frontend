@@ -110,10 +110,12 @@ export const CURRENT_MONTH_KEY = monthlyData[monthlyData.length - 1].monthKey;
 const CURRENT_YEAR = Number(CURRENT_MONTH_KEY.slice(0, 4));
 
 export function serializePeriod(period: Period): string {
+  if (period.kind === "historic") return "historic";
   return period.kind === "month" ? `month:${period.monthKey}` : `year:${period.year}`;
 }
 
 export function parsePeriod(value: string): Period {
+  if (value === "historic") return { kind: "historic" };
   const [kind, rest] = value.split(":");
   return kind === "year" ? { kind: "year", year: Number(rest) } : { kind: "month", monthKey: rest };
 }
@@ -124,6 +126,7 @@ export function getPeriodOptions(): PeriodOption[] {
     .map((month) => ({ value: serializePeriod({ kind: "month", monthKey: month.monthKey }), label: month.monthLabel }));
 
   return [
+    { value: serializePeriod({ kind: "historic" }), label: "Histórico" },
     { value: serializePeriod({ kind: "year", year: CURRENT_YEAR }), label: `${CURRENT_YEAR} (año completo)` },
     ...monthOptions,
   ];
@@ -203,6 +206,26 @@ function toAttendance(scheduled: number, absenteeismCount: number, notEligibleCo
   };
 }
 
+function aggregateMonths(months: MonthlyGerencialData[]) {
+  const donationsTotal = months.reduce((sum, month) => sum + month.donationsCount, 0);
+  const scheduledTotal = months.reduce((sum, month) => sum + month.scheduledAppointments, 0);
+  const absenteeismTotal = months.reduce((sum, month) => sum + month.absenteeismCount, 0);
+  const notEligibleTotal = months.reduce((sum, month) => sum + month.notEligibleCount, 0);
+
+  return {
+    kpis: {
+      donationsThisMonth: { value: donationsTotal },
+      peopleHelped: { value: donationsTotal * PEOPLE_HELPED_PER_DONATION },
+      scheduledAppointments: { value: scheduledTotal },
+      attendanceRate: {
+        value: scheduledTotal === 0 ? 0 : Math.round((1 - absenteeismTotal / scheduledTotal) * 100),
+      },
+    },
+    donationTypeBreakdown: toBreakdown(sumDonationTypeCounts(months)),
+    attendance: toAttendance(scheduledTotal, absenteeismTotal, notEligibleTotal, donationsTotal),
+  };
+}
+
 export function getDashboardViewModel(period: Period): DashboardViewModel {
   if (period.kind === "month") {
     const index = monthlyData.findIndex((month) => month.monthKey === period.monthKey);
@@ -238,32 +261,33 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
     };
   }
 
-  const yearMonths = monthlyData.filter((month) => month.monthKey.startsWith(String(period.year)));
-  const donationsTotal = yearMonths.reduce((sum, month) => sum + month.donationsCount, 0);
-  const scheduledTotal = yearMonths.reduce((sum, month) => sum + month.scheduledAppointments, 0);
-  const absenteeismTotal = yearMonths.reduce((sum, month) => sum + month.absenteeismCount, 0);
-  const notEligibleTotal = yearMonths.reduce((sum, month) => sum + month.notEligibleCount, 0);
+  if (period.kind === "year") {
+    const yearMonths = monthlyData.filter((month) => month.monthKey.startsWith(String(period.year)));
+    const monthlyTotalsByIndex = new Map(yearMonths.map((month) => [Number(month.monthKey.slice(5, 7)) - 1, month.donationsCount]));
+    const points: ChartPoint[] = MONTH_ABBR.map((label, index) => ({
+      label,
+      count: monthlyTotalsByIndex.get(index) ?? 0,
+    }));
 
-  const monthlyTotalsByIndex = new Map(yearMonths.map((month) => [Number(month.monthKey.slice(5, 7)) - 1, month.donationsCount]));
-  const points: ChartPoint[] = MONTH_ABBR.map((label, index) => ({
-    label,
-    count: monthlyTotalsByIndex.get(index) ?? 0,
+    return {
+      periodLabel: String(period.year),
+      ...aggregateMonths(yearMonths),
+      chart: { title: "Donaciones por mes", points },
+      // No hay un año anterior completo en los datos mock con el que comparar.
+      alerts: [],
+    };
+  }
+
+  const points: ChartPoint[] = monthlyData.map((month) => ({
+    label: `${MONTH_ABBR[Number(month.monthKey.slice(5, 7)) - 1]} ${month.monthKey.slice(2, 4)}`,
+    count: month.donationsCount,
   }));
 
   return {
-    periodLabel: String(period.year),
-    kpis: {
-      donationsThisMonth: { value: donationsTotal },
-      peopleHelped: { value: donationsTotal * PEOPLE_HELPED_PER_DONATION },
-      scheduledAppointments: { value: scheduledTotal },
-      attendanceRate: {
-        value: scheduledTotal === 0 ? 0 : Math.round((1 - absenteeismTotal / scheduledTotal) * 100),
-      },
-    },
+    periodLabel: "Histórico",
+    ...aggregateMonths(monthlyData),
     chart: { title: "Donaciones por mes", points },
-    donationTypeBreakdown: toBreakdown(sumDonationTypeCounts(yearMonths)),
-    attendance: toAttendance(scheduledTotal, absenteeismTotal, notEligibleTotal, donationsTotal),
-    // No hay un año anterior completo en los datos mock con el que comparar.
+    // Un histórico no tiene un "período anterior" con el que compararse.
     alerts: [],
   };
 }

@@ -89,9 +89,11 @@ export function GerencialDashboard() {
         <AttendanceSection data={viewModel.attendance} />
       </section>
 
-      <section className="mt-6">
-        <DonorLevelsChart items={donorLevelCounts} />
-      </section>
+      {period.kind === "historic" && (
+        <section className="mt-6">
+          <DonorLevelsChart items={donorLevelCounts} />
+        </section>
+      )}
     </div>
   );
 }

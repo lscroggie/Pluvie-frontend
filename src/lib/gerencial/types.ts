@@ -35,7 +35,7 @@ export type MonthlyGerencialData = {
   donationTypeCounts: Record<DonationTypeId, number>;
 };
 
-export type Period = { kind: "month"; monthKey: string } | { kind: "year"; year: number };
+export type Period = { kind: "month"; monthKey: string } | { kind: "year"; year: number } | { kind: "historic" };
 
 export type PeriodOption = {
   value: string;

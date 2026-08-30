@@ -10,9 +10,9 @@ export function DonorLevelsChart({ items }: { items: DonorLevelBreakdownItem[] }
     <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
-          Donantes por nivel Donate
+          Donantes por nivel
         </h2>
-        <span className="text-xs text-zinc-400">Total histórico · no varía según el período</span>
+        <span className="text-xs text-zinc-400">Acumulado de por vida</span>
       </div>
 
       <ul className="mt-5 space-y-3">
