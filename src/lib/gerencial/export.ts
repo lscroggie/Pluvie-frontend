@@ -14,6 +14,7 @@ function fileSlug(periodLabel: string): string {
 
 function deltaText(delta: DashboardViewModel["kpis"]["donationsThisMonth"]["delta"]): string {
   if (!delta) return "Sin período anterior";
+  if (delta.direction === "neutral") return `${delta.text} vs. período anterior`;
   const arrow = delta.direction === "up" ? "+" : "-";
   return `${arrow}${delta.text} vs. período anterior`;
 }

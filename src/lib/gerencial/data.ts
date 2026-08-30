@@ -137,12 +137,16 @@ function computeDelta(current: number, previous: number | undefined, unit: "pct"
 
   if (unit === "pp") {
     const diff = current - previous;
-    return { direction: diff >= 0 ? "up" : "down", text: `${Math.round(Math.abs(diff))}pp` };
+    const rounded = Math.round(Math.abs(diff));
+    if (rounded === 0) return { direction: "neutral", text: "Sin cambios" };
+    return { direction: diff >= 0 ? "up" : "down", text: `${rounded}pp` };
   }
 
   if (previous === 0) return undefined;
   const diff = ((current - previous) / previous) * 100;
-  return { direction: diff >= 0 ? "up" : "down", text: `${Math.round(Math.abs(diff))}%` };
+  const rounded = Math.round(Math.abs(diff));
+  if (rounded === 0) return { direction: "neutral", text: "Sin cambios" };
+  return { direction: diff >= 0 ? "up" : "down", text: `${rounded}%` };
 }
 
 function sumDonationTypeCounts(months: MonthlyGerencialData[]): Record<DonationTypeId, number> {

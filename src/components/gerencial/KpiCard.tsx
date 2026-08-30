@@ -8,6 +8,14 @@ const ACCENT_TEXT: Record<string, string> = {
 };
 
 function DeltaBadge({ delta, light = false }: { delta: KpiDelta; light?: boolean }) {
+  if (delta.direction === "neutral") {
+    return (
+      <p className={`mt-2 text-xs font-medium ${light ? "text-white/70" : "text-zinc-400"}`}>
+        {delta.text} vs mes anterior
+      </p>
+    );
+  }
+
   const arrow = delta.direction === "up" ? "↑" : "↓";
   const colorClass = light
     ? "text-white/90"

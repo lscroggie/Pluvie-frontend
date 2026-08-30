@@ -43,7 +43,7 @@ export type PeriodOption = {
 };
 
 export type KpiDelta = {
-  direction: "up" | "down";
+  direction: "up" | "down" | "neutral";
   text: string; // "12%" or "3pp", without arrow or "vs ..." suffix
 };
 
