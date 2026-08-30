@@ -81,6 +81,9 @@ export const monthlyData: MonthlyGerencialData[] = [
   buildMonth(7, 2026, 412, 548, 0.89),
 ];
 
+// Mock: en producción vendría del perfil de la institución logueada.
+export const INSTITUTION_NAME = "Swiss Medical";
+
 export const CURRENT_MONTH_KEY = monthlyData[monthlyData.length - 1].monthKey;
 const CURRENT_YEAR = Number(CURRENT_MONTH_KEY.slice(0, 4));
 

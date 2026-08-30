@@ -1,12 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CURRENT_MONTH_KEY, getDashboardViewModel, getPeriodOptions, parsePeriod, serializePeriod } from "@/lib/gerencial/data";
+import {
+  CURRENT_MONTH_KEY,
+  getDashboardViewModel,
+  getPeriodOptions,
+  INSTITUTION_NAME,
+  parsePeriod,
+  serializePeriod,
+} from "@/lib/gerencial/data";
 import type { Period } from "@/lib/gerencial/types";
 import { AttendanceSection } from "./AttendanceSection";
 import { DonationsBarChart } from "./DonationsBarChart";
 import { DonationTypeBreakdown } from "./DonationTypeBreakdown";
-import { DownloadIcon } from "./icons";
+import { ExportMenu } from "./ExportMenu";
 import { KpiCard } from "./KpiCard";
 import { PeriodSelector } from "./PeriodSelector";
 
@@ -34,10 +41,7 @@ export function GerencialDashboard() {
             value={serializePeriod(period)}
             onChange={(value) => setPeriod(parsePeriod(value))}
           />
-          <span className="flex cursor-not-allowed items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-500">
-            <DownloadIcon className="h-4 w-4" />
-            Exportar reporte
-          </span>
+          <ExportMenu viewModel={viewModel} institutionName={INSTITUTION_NAME} />
         </div>
       </div>
 
