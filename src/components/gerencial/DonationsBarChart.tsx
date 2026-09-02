@@ -37,15 +37,19 @@ function AnnotatedTick({
 
   return (
     <g transform={`translate(${x},${y})`}>
+      {/* Marcador pegado a la línea del eje (arriba del label), como un
+          pin/bandera — a propósito NO es un círculo, para no confundirse con
+          los dots de datos de la línea. */}
+      {annotation && (
+        <g transform="translate(0,-2)" style={{ cursor: "help" }}>
+          <title>{annotation.label}</title>
+          <rect x={-6} y={-10} width={12} height={12} fill="transparent" />
+          <path d="M0,0 L4,-8 L-4,-8 Z" fill="#6C5CE7" />
+        </g>
+      )}
       <text x={0} y={0} dy={12} textAnchor="middle" fill="#71717a" fontSize={12}>
         {payload.value}
       </text>
-      {annotation && (
-        <g transform="translate(0,20)" style={{ cursor: "help" }}>
-          <title>{annotation.label}</title>
-          <circle r={3.5} fill="#6C5CE7" />
-        </g>
-      )}
     </g>
   );
 }
@@ -185,6 +189,7 @@ export function DonationsBarChart({
                 content={<LineTooltip metricLabel={metricLabel} />}
                 cursor={{ stroke: "#e4e4e7", strokeWidth: 1 }}
                 allowEscapeViewBox={{ x: false, y: true }}
+                reverseDirection={{ x: false, y: true }}
               />
               {/* El relleno va sin trazo propio (stroke="none") — si el Area
                   tuviera stroke, dibujaría el contorno de todo el polígono
