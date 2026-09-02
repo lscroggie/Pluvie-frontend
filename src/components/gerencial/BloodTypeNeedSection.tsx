@@ -18,12 +18,18 @@ export function BloodTypeNeedSection() {
 
   const donorCount = selectedType ? bloodTypeDonorCounts[selectedType] : null;
 
-  function handleNotify() {
+  function handleMarkActive() {
     if (!selectedType || donorCount === null) return;
-    // Placeholder: no dispara ningún envío real (ni SMS ni WhatsApp, para no
-    // spamear al donante). Queda preparado para conectar a futuro con un
-    // sistema de notificaciones in-app.
-    setToastMessage(`Se notificó a ${donorCount} donantes ${selectedType}`);
+    // Placeholder: modelo pasivo a propósito. Pluvie nunca sale a buscar al
+    // donante (nada de SMS/WhatsApp/email/push disparado activamente desde
+    // acá) — esto solo marca un estado que se muestra pasivamente cuando el
+    // donante ya está prestando atención: al entrar a su perfil, o como
+    // notificación push si él mismo la tiene habilitada en su dispositivo
+    // (la entrega la controla su SO, no Pluvie). Queda preparado para
+    // conectar a futuro con ese estado real en el perfil del donante.
+    setToastMessage(
+      `Necesidad de ${selectedType} marcada como activa. Los donantes compatibles la verán al entrar a su perfil o si tienen notificaciones habilitadas.`,
+    );
   }
 
   return (
@@ -51,11 +57,11 @@ export function BloodTypeNeedSection() {
 
         <button
           type="button"
-          onClick={handleNotify}
+          onClick={handleMarkActive}
           disabled={!selectedType}
           className="rounded-lg bg-brand-violet px-3 py-1.5 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Notificar donantes
+          Marcar como necesidad activa
         </button>
       </div>
 
