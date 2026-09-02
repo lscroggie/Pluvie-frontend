@@ -6,6 +6,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Line,
   LabelList,
   ResponsiveContainer,
   Tooltip,
@@ -154,7 +155,7 @@ export function DonationsBarChart({
 
         <div className="mt-4 h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 20, right: 4, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 20, right: 16, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="donationsAreaFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#6C5CE7" stopOpacity={0.25} />
@@ -171,6 +172,8 @@ export function DonationsBarChart({
                 dy={xAxisDy}
               />
               <YAxis
+                type="number"
+                domain={[0, (dataMax: number) => Math.ceil((dataMax + 1) / 30) * 30]}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "#a1a1aa", fontSize: 10 }}
@@ -181,25 +184,39 @@ export function DonationsBarChart({
               <Tooltip
                 content={<LineTooltip metricLabel={metricLabel} />}
                 cursor={{ stroke: "#e4e4e7", strokeWidth: 1 }}
+                allowEscapeViewBox={{ x: false, y: true }}
               />
-              <Area
+              {/* El relleno va sin trazo propio (stroke="none") — si el Area
+                  tuviera stroke, dibujaría el contorno de todo el polígono
+                  (bordes verticales + base), no solo la curva de arriba, lo
+                  que se ve como un recuadro y como un salto vertical en la
+                  transición al tramo punteado. La curva visible la dibuja el
+                  <Line> de abajo, superpuesto. */}
+              <Area type="monotone" dataKey="actual" stroke="none" fill="url(#donationsAreaFill)" />
+              {projection && (
+                <Area
+                  type="monotone"
+                  dataKey="projected"
+                  stroke="none"
+                  fill="url(#donationsAreaFill)"
+                  fillOpacity={0.6}
+                />
+              )}
+              <Line
                 type="monotone"
                 dataKey="actual"
                 stroke="#6C5CE7"
                 strokeWidth={2}
-                fill="url(#donationsAreaFill)"
                 dot={ActualDot}
                 activeDot={{ r: 5, fill: "#5A4BD1", stroke: "#ffffff", strokeWidth: 2 }}
               />
               {projection && (
-                <Area
+                <Line
                   type="monotone"
                   dataKey="projected"
                   stroke="#6C5CE7"
                   strokeWidth={2}
                   strokeDasharray="5 4"
-                  fill="url(#donationsAreaFill)"
-                  fillOpacity={0.6}
                   dot={makeProjectedDot(projection.label)}
                   activeDot={{ r: 5, fill: "#8D7FF5", stroke: "#ffffff", strokeWidth: 2 }}
                 />
