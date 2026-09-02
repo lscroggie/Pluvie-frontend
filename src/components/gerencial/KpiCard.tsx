@@ -45,6 +45,7 @@ export function KpiCard({
   icon,
   detail,
   highlight = false,
+  sparkline,
 }: {
   // Ancla opcional para navegación interna (ej. desde una alerta con
   // scrollIntoView), no afecta el estilo ni el comportamiento de la card.
@@ -63,6 +64,9 @@ export function KpiCard({
   // sacó el violeta sólido de las cards destacadas), solo se remarca con un
   // borde violeta y un valor más grande.
   highlight?: boolean;
+  // Slot para un <Sparkline> junto al valor principal (solo las 5 KPI cards
+  // de KpiGrid lo usan hoy).
+  sparkline?: ReactNode;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -77,11 +81,12 @@ export function KpiCard({
           />
         )}
       </p>
-      <p
-        className={`mt-1 font-bold leading-none ${highlight ? "text-3xl" : "text-xl"} ${ACCENT_TEXT[accent]}`}
-      >
-        {value}
-      </p>
+      <div className="mt-1 flex items-end justify-between gap-2">
+        <p className={`font-bold leading-none ${highlight ? "text-3xl" : "text-xl"} ${ACCENT_TEXT[accent]}`}>
+          {value}
+        </p>
+        {sparkline}
+      </div>
       {delta && <DeltaBadge delta={delta} />}
       {badge && <div className="mt-1.5">{badge}</div>}
       {sublabel && <p className="mt-1 text-xs text-zinc-400">{sublabel}</p>}

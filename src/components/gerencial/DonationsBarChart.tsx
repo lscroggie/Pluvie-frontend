@@ -1,10 +1,41 @@
 "use client";
 
 import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import type { ChartPoint } from "@/lib/gerencial/types";
+import type { ChartAnnotation, ChartPoint } from "@/lib/gerencial/types";
 
 function formatNumber(value: unknown): string {
   return typeof value === "number" ? value.toLocaleString("es-AR") : String(value ?? "");
+}
+
+// Tick de eje X con marcador de anotación opcional (ícono + tooltip nativo
+// via <title>, sin JS extra). Solo dibuja el marcador cuando el label del
+// punto coincide con una anotación.
+function AnnotatedTick({
+  x,
+  y,
+  payload,
+  annotations,
+}: {
+  x: number | string;
+  y: number | string;
+  payload: { value: string };
+  annotations: ChartAnnotation[];
+}) {
+  const annotation = annotations.find((item) => item.pointLabel === payload.value);
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} dy={12} textAnchor="middle" fill="#71717a" fontSize={12}>
+        {payload.value}
+      </text>
+      {annotation && (
+        <g transform="translate(0,20)" style={{ cursor: "help" }}>
+          <title>{annotation.label}</title>
+          <circle r={3.5} fill="#6C5CE7" />
+        </g>
+      )}
+    </g>
+  );
 }
 
 type ChartDatum = { label: string; actual: number | null; projected: number | null };
@@ -27,10 +58,15 @@ export function DonationsBarChart({
   title,
   points,
   projection = null,
+  annotations = [],
 }: {
   title: string;
   points: ChartPoint[];
   projection?: ChartPoint | null;
+  // Marcadores opcionales sobre puntos del eje X (ver ChartAnnotation) — hoy
+  // solo se pasan datos de ejemplo desde la tendencia principal, ver
+  // SAMPLE_CHART_ANNOTATIONS en data.ts.
+  annotations?: ChartAnnotation[];
 }) {
   const data = buildChartData(points, projection);
 
@@ -57,8 +93,9 @@ export function DonationsBarChart({
               dataKey="label"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#71717a", fontSize: 12 }}
-              dy={8}
+              tick={annotations.length > 0 ? (props) => <AnnotatedTick {...props} annotations={annotations} /> : { fill: "#71717a", fontSize: 12 }}
+              height={annotations.length > 0 ? 34 : undefined}
+              dy={annotations.length > 0 ? 0 : 8}
             />
             <YAxis
               axisLine={false}
