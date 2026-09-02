@@ -20,6 +20,7 @@ import {
 import type { Period } from "@/lib/gerencial/types";
 import { AlertsSection } from "./AlertsSection";
 import { AttendanceSection } from "./AttendanceSection";
+import { BloodTypeNeedSection } from "./BloodTypeNeedSection";
 import { DashboardFooter } from "./DashboardFooter";
 import { DashboardHeader } from "./DashboardHeader";
 import { DonationsChartSection } from "./DonationsChartSection";
@@ -58,6 +59,10 @@ export function GerencialDashboard() {
 
       <div className="mt-6">
         <DonationsChartSection chart={viewModel.chart} donationTypeBreakdown={viewModel.donationTypeBreakdown} />
+      </div>
+
+      <div className="mt-6">
+        <BloodTypeNeedSection />
       </div>
 
       <section className="mt-6">

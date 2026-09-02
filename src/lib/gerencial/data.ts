@@ -59,6 +59,12 @@ const NOT_ELIGIBLE_REASON_SHARES: { label: string; share: number }[] = [
 // fija en vez de derivarse de datos reales por donante.
 const RETENTION_WITHIN_3_MONTHS_SHARE = 0.35;
 
+// Ventana de la media móvil de tendencia y cantidad de períodos reales que
+// se usan para la regresión lineal de la proyección del próximo período.
+const TREND_MOVING_AVERAGE_WINDOW = 3;
+const PROJECTION_LOOKBACK = 6;
+const PROJECTION_LABEL = "Estimado";
+
 const DONATION_TYPE_LABELS: Record<DonationTypeId, string> = {
   "sangre-entera": "Glóbulos rojos",
   plaquetas: "Plaquetas",
@@ -114,6 +120,47 @@ function splitNotEligibleReasons(total: number): NotEligibleReason[] {
   const counts = NOT_ELIGIBLE_REASON_SHARES.slice(0, -1).map((reason) => Math.round(total * reason.share));
   counts.push(total - counts.reduce((sum, n) => sum + n, 0));
   return NOT_ELIGIBLE_REASON_SHARES.map((reason, index) => ({ label: reason.label, count: counts[index] }));
+}
+
+// Media móvil simple de tendencia: cada punto promedia hasta las últimas
+// TREND_MOVING_AVERAGE_WINDOW muestras reales (los primeros puntos, que
+// todavía no tienen ventana completa, promedian lo que haya disponible).
+function movingAverage(points: ChartPoint[]): ChartPoint[] {
+  return points.map((point, index) => {
+    const windowStart = Math.max(0, index - TREND_MOVING_AVERAGE_WINDOW + 1);
+    const window = points.slice(windowStart, index + 1);
+    const avg = window.reduce((sum, p) => sum + p.count, 0) / window.length;
+    return { label: point.label, count: Math.round(avg) };
+  });
+}
+
+// Proyección del próximo período por regresión lineal simple (mínimos
+// cuadrados) sobre los últimos PROJECTION_LOOKBACK puntos reales. Método
+// estadístico simple, no un modelo predictivo: solo extrapola la tendencia
+// reciente un paso adelante, con piso en 0.
+function linearRegressionProjection(points: ChartPoint[]): ChartPoint | null {
+  const sample = points.slice(-PROJECTION_LOOKBACK);
+  if (sample.length < 2) return null;
+
+  const n = sample.length;
+  const xs = sample.map((_, i) => i);
+  const ys = sample.map((p) => p.count);
+  const xMean = xs.reduce((sum, x) => sum + x, 0) / n;
+  const yMean = ys.reduce((sum, y) => sum + y, 0) / n;
+
+  const numerator = xs.reduce((sum, x, i) => sum + (x - xMean) * (ys[i] - yMean), 0);
+  const denominator = xs.reduce((sum, x) => sum + (x - xMean) ** 2, 0);
+  if (denominator === 0) return { label: PROJECTION_LABEL, count: Math.round(yMean) };
+
+  const slope = numerator / denominator;
+  const intercept = yMean - slope * xMean;
+  const nextValue = intercept + slope * n;
+
+  return { label: PROJECTION_LABEL, count: Math.max(0, Math.round(nextValue)) };
+}
+
+function computeTrendAndProjection(points: ChartPoint[]): { trend: ChartPoint[]; projection: ChartPoint | null } {
+  return { trend: movingAverage(points), projection: linearRegressionProjection(points) };
 }
 
 function buildMonth(
@@ -445,7 +492,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
           delta: computeDelta(attendanceRate * 100, previousAttendanceRate && previousAttendanceRate * 100, "pp"),
         },
       },
-      chart: { title: "Donaciones por semana", points: month.weeklyDonations },
+      chart: { title: "Donaciones por semana", points: month.weeklyDonations, ...computeTrendAndProjection(month.weeklyDonations) },
       donationTypeBreakdown: toBreakdown(month.donationTypeCounts),
       attendance: toAttendance(month.scheduledAppointments, month.absenteeismCount, month.notEligibleCount, month.donationsCount),
       notEligibleReasons: splitNotEligibleReasons(month.notEligibleCount),
@@ -470,7 +517,11 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
     return {
       periodLabel: String(period.year),
       ...aggregateMonths(yearMonths),
-      chart: { title: "Donaciones por mes", points },
+      // La vista de año rellena con 0 los meses futuros del año en curso para
+      // completar las 12 barras: no son datos reales, así que no se calcula
+      // tendencia/proyección acá (rompería la regresión y chocaría con el
+      // mes futuro ya mostrado en 0).
+      chart: { title: "Donaciones por mes", points, trend: [], projection: null },
       // No hay un año anterior completo en los datos mock con el que comparar.
       alerts: [],
       suggestions: [],
@@ -485,7 +536,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
   return {
     periodLabel: "Histórico",
     ...aggregateMonths(monthlyData),
-    chart: { title: "Donaciones por mes", points },
+    chart: { title: "Donaciones por mes", points, ...computeTrendAndProjection(points) },
     // Un histórico no tiene un "período anterior" con el que compararse.
     alerts: [],
     suggestions: [],
