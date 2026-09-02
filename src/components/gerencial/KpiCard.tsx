@@ -50,7 +50,7 @@ export function KpiCard({
 }) {
   if (highlighted) {
     return (
-      <div className="rounded-xl bg-brand-violet p-4">
+      <div className="rounded-xl bg-brand-violet p-4 transition-colors hover:bg-brand-violet-dark">
         <p className="flex items-center gap-1.5 text-xs font-medium text-white/80">
           {icon}
           {label}
@@ -63,7 +63,7 @@ export function KpiCard({
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4">
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:bg-zinc-50">
       <p className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
         {icon}
         {label}

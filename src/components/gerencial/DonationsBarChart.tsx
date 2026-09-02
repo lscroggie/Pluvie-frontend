@@ -71,8 +71,28 @@ export function DonationsBarChart({
               width={40}
               allowDecimals={false}
             />
+            {/* La línea se declara antes que las barras para que quede dibujada
+                debajo: las barras y sus etiquetas numéricas siempre ganan el
+                z-order en SVG y quedan completamente legibles. */}
+            {trend.length > 0 && (
+              <Line
+                dataKey="trend"
+                stroke="#5A4BD1"
+                strokeWidth={2}
+                dot={false}
+                activeDot={false}
+                isAnimationActive={false}
+              />
+            )}
             <Bar dataKey="actual" fill="url(#donationsBarFill)" radius={[4, 4, 0, 0]} maxBarSize={24}>
-              <LabelList dataKey="actual" position="top" formatter={formatNumber} style={{ fill: "#52525b", fontSize: 11, fontWeight: 500 }} />
+              <LabelList
+                dataKey="actual"
+                position="top"
+                formatter={formatNumber}
+                style={{ fill: "#52525b", fontSize: 11, fontWeight: 500, paintOrder: "stroke" }}
+                stroke="#ffffff"
+                strokeWidth={4}
+              />
             </Bar>
             {projection && (
               <Bar
@@ -85,18 +105,15 @@ export function DonationsBarChart({
                 radius={[4, 4, 0, 0]}
                 maxBarSize={24}
               >
-                <LabelList dataKey="projected" position="top" formatter={formatNumber} style={{ fill: "#6C5CE7", fontSize: 11, fontWeight: 500 }} />
+                <LabelList
+                  dataKey="projected"
+                  position="top"
+                  formatter={formatNumber}
+                  style={{ fill: "#6C5CE7", fontSize: 11, fontWeight: 500, paintOrder: "stroke" }}
+                  stroke="#ffffff"
+                  strokeWidth={4}
+                />
               </Bar>
-            )}
-            {trend.length > 0 && (
-              <Line
-                dataKey="trend"
-                stroke="#5A4BD1"
-                strokeWidth={2}
-                dot={false}
-                activeDot={false}
-                isAnimationActive={false}
-              />
             )}
           </ComposedChart>
         </ResponsiveContainer>
