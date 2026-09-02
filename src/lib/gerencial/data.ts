@@ -11,8 +11,10 @@ import type {
   DonorSegmentation,
   KpiDelta,
   MonthlyGerencialData,
+  NotEligibleReason,
   Period,
   PeriodOption,
+  RetentionCohort,
   SocialImpact,
   Suggestion,
 } from "./types";
@@ -41,6 +43,21 @@ const LITERS_PER_EFFECTIVE_DONATION = 0.45;
 // el resto a ausentismo real. No existe hoy este desglose en los datos
 // históricos, así que se estima con esta proporción fija.
 const NOT_ELIGIBLE_SHARE_OF_GAP = 0.2;
+
+// Mock: motivos que registra el staff para "asistió pero no pudo donar",
+// como proporción fija del total. Pluvie solo agrega y visibiliza este dato,
+// no diagnostica ni lo registra automáticamente.
+const NOT_ELIGIBLE_REASON_SHARES: { label: string; share: number }[] = [
+  { label: "Presión baja", share: 0.45 },
+  { label: "Hemoglobina insuficiente", share: 0.4 },
+  { label: "Otro", share: 0.15 },
+];
+
+// Mock: de los donantes que donan por primera vez en un mes, esta proporción
+// vuelve a donar dentro de los siguientes 3 meses. No existe hoy un modelo de
+// donante individual con historial, así que se estima con esta proporción
+// fija en vez de derivarse de datos reales por donante.
+const RETENTION_WITHIN_3_MONTHS_SHARE = 0.35;
 
 const DONATION_TYPE_LABELS: Record<DonationTypeId, string> = {
   "sangre-entera": "Glóbulos rojos",
@@ -91,6 +108,12 @@ function splitByDonationType(total: number): Record<DonationTypeId, number> {
 function splitNewVsRecurringDonors(total: number): { newDonorsCount: number; recurringDonorsCount: number } {
   const newDonorsCount = Math.round(total * NEW_DONOR_SHARE);
   return { newDonorsCount, recurringDonorsCount: total - newDonorsCount };
+}
+
+function splitNotEligibleReasons(total: number): NotEligibleReason[] {
+  const counts = NOT_ELIGIBLE_REASON_SHARES.slice(0, -1).map((reason) => Math.round(total * reason.share));
+  counts.push(total - counts.reduce((sum, n) => sum + n, 0));
+  return NOT_ELIGIBLE_REASON_SHARES.map((reason, index) => ({ label: reason.label, count: counts[index] }));
 }
 
 function buildMonth(
@@ -145,6 +168,23 @@ export const INSTITUTION_NAME = "Swiss Medical";
 
 export const CURRENT_MONTH_KEY = monthlyData[monthlyData.length - 1].monthKey;
 const CURRENT_YEAR = Number(CURRENT_MONTH_KEY.slice(0, 4));
+
+// Cohortes de retención: solo para meses que ya tienen 3 meses posteriores
+// completos en monthlyData (los últimos 3 meses del mock quedan afuera
+// porque todavía no se les puede medir la ventana de 3 meses).
+export const retentionCohorts: RetentionCohort[] = monthlyData
+  .slice(0, -3)
+  .map((month) => {
+    const firstTimeDonors = month.newDonorsCount;
+    const returnedWithin3Months = Math.round(firstTimeDonors * RETENTION_WITHIN_3_MONTHS_SHARE);
+    return {
+      monthKey: month.monthKey,
+      monthLabel: month.monthLabel,
+      firstTimeDonors,
+      returnedWithin3Months,
+      returnRatePct: firstTimeDonors === 0 ? 0 : Math.round((returnedWithin3Months / firstTimeDonors) * 100),
+    };
+  });
 
 // Mock: hoy simula "se actualizó ahora" con la hora del sistema al cargar la
 // página. Cuando se conecte al backend real, reemplazar por el timestamp de
@@ -368,6 +408,7 @@ function aggregateMonths(months: MonthlyGerencialData[]) {
     },
     donationTypeBreakdown: toBreakdown(sumDonationTypeCounts(months)),
     attendance: toAttendance(scheduledTotal, absenteeismTotal, notEligibleTotal, donationsTotal),
+    notEligibleReasons: splitNotEligibleReasons(notEligibleTotal),
     donorSegmentation: sumDonorSegmentation(months),
     impact: computeImpact(donationsTotal, peopleHelped),
   };
@@ -407,6 +448,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
       chart: { title: "Donaciones por semana", points: month.weeklyDonations },
       donationTypeBreakdown: toBreakdown(month.donationTypeCounts),
       attendance: toAttendance(month.scheduledAppointments, month.absenteeismCount, month.notEligibleCount, month.donationsCount),
+      notEligibleReasons: splitNotEligibleReasons(month.notEligibleCount),
       donorSegmentation: { newDonors: month.newDonorsCount, recurringDonors: month.recurringDonorsCount },
       impact: computeImpact(month.donationsCount, month.donationsCount * PEOPLE_HELPED_PER_DONATION),
       // La disponibilidad de turnos de la semana que viene es información de

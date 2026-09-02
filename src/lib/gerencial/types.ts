@@ -24,6 +24,13 @@ export type AttendanceBreakdown = {
   effectiveDonations: number;
 };
 
+// Motivo registrado por el staff para "asistió pero no pudo donar". Pluvie
+// solo lo agrega y visibiliza, no diagnostica.
+export type NotEligibleReason = {
+  label: string;
+  count: number;
+};
+
 export type MonthlyGerencialData = {
   monthKey: string; // "2026-08"
   monthLabel: string; // "Agosto 2026"
@@ -93,6 +100,18 @@ export type DonorSegmentation = {
   recurringDonors: number;
 };
 
+// Retención simple por cohorte: de los donantes que donaron por primera vez
+// en monthLabel, qué proporción volvió a donar dentro de los siguientes 3
+// meses. Solo se calcula para meses que ya tienen 3 meses posteriores
+// completos en los datos.
+export type RetentionCohort = {
+  monthKey: string;
+  monthLabel: string;
+  firstTimeDonors: number;
+  returnedWithin3Months: number;
+  returnRatePct: number;
+};
+
 // Versión simple del impacto 3x ya usado en el KPI "Personas ayudadas",
 // sin ponerle valor monetario.
 export type SocialImpact = {
@@ -117,6 +136,7 @@ export type DashboardViewModel = {
   };
   donationTypeBreakdown: DonationTypeBreakdownItem[];
   attendance: AttendanceBreakdown;
+  notEligibleReasons: NotEligibleReason[];
   donorSegmentation: DonorSegmentation;
   impact: SocialImpact;
   alerts: Alert[];

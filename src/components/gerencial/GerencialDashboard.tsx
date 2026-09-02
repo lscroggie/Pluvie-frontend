@@ -9,9 +9,14 @@ import {
   getPeriodOptions,
   INSTITUTION_NAME,
   parsePeriod,
+  retentionCohorts,
   serializePeriod,
 } from "@/lib/gerencial/data";
-import { donorLevelCounts } from "@/lib/gerencial/donorLevels";
+import {
+  donorLevelCounts,
+  donorLevelInactivityCounts,
+  HIGH_LEVEL_INACTIVITY_THRESHOLD_MONTHS,
+} from "@/lib/gerencial/donorLevels";
 import type { Period } from "@/lib/gerencial/types";
 import { AlertsSection } from "./AlertsSection";
 import { AttendanceSection } from "./AttendanceSection";
@@ -19,7 +24,9 @@ import { DashboardFooter } from "./DashboardFooter";
 import { DashboardHeader } from "./DashboardHeader";
 import { DonationsChartSection } from "./DonationsChartSection";
 import { DonorLevelsSection } from "./DonorLevelsSection";
+import { DonorRiskSection } from "./DonorRiskSection";
 import { KpiGrid } from "./KpiGrid";
+import { RetentionCohortsSection } from "./RetentionCohortsSection";
 import { SegmentationAndImpactSection } from "./SegmentationAndImpactSection";
 import { SuggestionsSection } from "./SuggestionsSection";
 
@@ -54,15 +61,27 @@ export function GerencialDashboard() {
       </div>
 
       <section className="mt-6">
-        <AttendanceSection data={viewModel.attendance} />
+        <AttendanceSection data={viewModel.attendance} notEligibleReasons={viewModel.notEligibleReasons} />
       </section>
 
       <section className="mt-6">
         <SegmentationAndImpactSection donorSegmentation={viewModel.donorSegmentation} impact={viewModel.impact} />
       </section>
 
-      <section className="mt-6">
+      <section className="mt-6 grid gap-6 lg:grid-cols-2">
         <DonorLevelsSection visible={period.kind === "historic"} items={donorLevelCounts} />
+        <RetentionCohortsSection visible={period.kind === "historic"} cohorts={retentionCohorts} />
+      </section>
+
+      <section className="mt-6">
+        <DonorRiskSection
+          visible={period.kind === "historic"}
+          thresholdMonths={HIGH_LEVEL_INACTIVITY_THRESHOLD_MONTHS}
+          oroTotal={donorLevelCounts.find((item) => item.id === "oro")?.count ?? 0}
+          diamanteTotal={donorLevelCounts.find((item) => item.id === "diamante")?.count ?? 0}
+          oroInactive={donorLevelInactivityCounts.oro}
+          diamanteInactive={donorLevelInactivityCounts.diamante}
+        />
       </section>
 
       <div className="mt-8">

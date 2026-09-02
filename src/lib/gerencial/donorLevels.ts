@@ -39,3 +39,17 @@ export const monthlyDonorLevelCounts: { monthKey: string; counts: Record<DonorLe
   { monthKey: "2026-07", counts: { bronce: 476, plata: 255, oro: 89, diamante: 29 } },
   { monthKey: "2026-08", counts: { bronce: 480, plata: 260, oro: 95, diamante: 30 } },
 ];
+
+// Umbral de inactividad para el seguimiento de donantes de nivel alto: no es
+// un cambio de nivel (el nivel Donate es permanente), solo una métrica de
+// seguimiento aparte. Ajustable.
+export const HIGH_LEVEL_INACTIVITY_THRESHOLD_MONTHS = 6;
+
+// Mock: de los donantes Oro/Diamante acumulados (donorLevelCounts), cuántos
+// no donan hace más de HIGH_LEVEL_INACTIVITY_THRESHOLD_MONTHS. No existe hoy
+// un modelo de donante individual con fecha de última donación, así que se
+// mockea directamente como subconjunto de los totales.
+export const donorLevelInactivityCounts: { oro: number; diamante: number } = {
+  oro: 14,
+  diamante: 4,
+};
