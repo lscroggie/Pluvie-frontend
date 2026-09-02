@@ -1,16 +1,20 @@
 import { PEOPLE_HELPED_PER_DONATION } from "@/lib/donor-profile/data";
 import type { DonationTypeId } from "@/lib/donor-booking/types";
-import { DONOR_LEVEL_LABELS, monthlyDonorLevelCounts } from "./donorLevels";
+import { BLOOD_TYPES, bloodTypeDonorCounts } from "./bloodTypes";
+import { DONOR_LEVEL_LABELS, donorLevelCounts, monthlyDonorLevelCounts } from "./donorLevels";
 import type {
   Alert,
   AttendanceBreakdown,
+  BloodTypeBreakdownItem,
   ChartPoint,
   DashboardViewModel,
   DonationTypeBreakdownItem,
+  DonorLevelBreakdownItem,
   DonorLevelId,
   DonorSegmentation,
   KpiDelta,
   MonthlyGerencialData,
+  NewDonorDetail,
   NotEligibleReason,
   Period,
   PeriodOption,
@@ -32,6 +36,13 @@ const LOW_SLOT_AVAILABILITY_THRESHOLD_PCT = 50;
 // así que se estima con esta proporción fija en vez de derivarse de datos
 // reales por donante.
 const NEW_DONOR_SHARE = 0.3;
+
+// Mock: por cada donante nuevo que ya efectivizó su primera donación
+// (newDonorsCount), esta proporción adicional representa personas que se
+// registraron en Pluvie pero todavía no llegaron a donar. Es un grupo
+// distinto y aparte (no un split del mismo total), estimado porque no existe
+// hoy un modelo de registro de donante sin donación asociada.
+const NEW_DONOR_PENDING_SHARE = 0.4;
 
 // Mock: litros por donación efectiva de sangre entera (valor estándar de
 // referencia, ~450ml). Es una aproximación simple, no un dato clínico real
@@ -297,6 +308,36 @@ function toBreakdown(counts: Record<DonationTypeId, number>): DonationTypeBreakd
   }));
 }
 
+function computePeopleHelpedBreakdown(donationTypeBreakdown: DonationTypeBreakdownItem[]): DonationTypeBreakdownItem[] {
+  return donationTypeBreakdown.map((item) => ({ ...item, count: item.count * PEOPLE_HELPED_PER_DONATION }));
+}
+
+// Reparte `total` entre las proporciones institucionales de bloodTypeDonorCounts.
+function distributeByBloodTypeShare(total: number): BloodTypeBreakdownItem[] {
+  const grandTotal = BLOOD_TYPES.reduce((sum, type) => sum + bloodTypeDonorCounts[type], 0);
+  const counts = BLOOD_TYPES.slice(0, -1).map((type) =>
+    Math.round(total * (bloodTypeDonorCounts[type] / grandTotal)),
+  );
+  counts.push(total - counts.reduce((sum, n) => sum + n, 0));
+  return BLOOD_TYPES.map((type, index) => ({ bloodType: type, count: counts[index] }));
+}
+
+function computeNewDonorDetail(newDonorsCount: number): NewDonorDetail {
+  return {
+    activatedCount: newDonorsCount,
+    pendingCount: Math.round(newDonorsCount * NEW_DONOR_PENDING_SHARE),
+    byBloodType: distributeByBloodTypeShare(newDonorsCount),
+  };
+}
+
+// Reparte `total` entre las proporciones institucionales de donorLevelCounts.
+function computeRecurringDonorLevelBreakdown(recurringDonors: number): DonorLevelBreakdownItem[] {
+  const grandTotal = donorLevelCounts.reduce((sum, item) => sum + item.count, 0);
+  const counts = donorLevelCounts.slice(0, -1).map((item) => Math.round(recurringDonors * (item.count / grandTotal)));
+  counts.push(recurringDonors - counts.reduce((sum, n) => sum + n, 0));
+  return donorLevelCounts.map((item, index) => ({ ...item, count: counts[index] }));
+}
+
 function computeAlerts(month: MonthlyGerencialData, previous: MonthlyGerencialData | undefined): Alert[] {
   if (!previous) return [];
 
@@ -431,6 +472,8 @@ function aggregateMonths(months: MonthlyGerencialData[]) {
   const absenteeismTotal = months.reduce((sum, month) => sum + month.absenteeismCount, 0);
   const notEligibleTotal = months.reduce((sum, month) => sum + month.notEligibleCount, 0);
   const peopleHelped = donationsTotal * PEOPLE_HELPED_PER_DONATION;
+  const donationTypeBreakdown = toBreakdown(sumDonationTypeCounts(months));
+  const donorSegmentation = sumDonorSegmentation(months);
 
   return {
     kpis: {
@@ -441,10 +484,13 @@ function aggregateMonths(months: MonthlyGerencialData[]) {
         value: scheduledTotal === 0 ? 0 : Math.round((1 - absenteeismTotal / scheduledTotal) * 100),
       },
     },
-    donationTypeBreakdown: toBreakdown(sumDonationTypeCounts(months)),
+    peopleHelpedBreakdown: computePeopleHelpedBreakdown(donationTypeBreakdown),
+    donationTypeBreakdown,
     attendance: toAttendance(scheduledTotal, absenteeismTotal, notEligibleTotal, donationsTotal),
     notEligibleReasons: splitNotEligibleReasons(notEligibleTotal),
-    donorSegmentation: sumDonorSegmentation(months),
+    donorSegmentation,
+    newDonorDetail: computeNewDonorDetail(donorSegmentation.newDonors),
+    recurringDonorLevelBreakdown: computeRecurringDonorLevelBreakdown(donorSegmentation.recurringDonors),
     impact: computeImpact(donationsTotal, peopleHelped),
   };
 }
@@ -481,10 +527,13 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
         },
       },
       chart: { title: "Donaciones por semana", points: month.weeklyDonations, projection: linearRegressionProjection(month.weeklyDonations) },
+      peopleHelpedBreakdown: computePeopleHelpedBreakdown(toBreakdown(month.donationTypeCounts)),
       donationTypeBreakdown: toBreakdown(month.donationTypeCounts),
       attendance: toAttendance(month.scheduledAppointments, month.absenteeismCount, month.notEligibleCount, month.donationsCount),
       notEligibleReasons: splitNotEligibleReasons(month.notEligibleCount),
       donorSegmentation: { newDonors: month.newDonorsCount, recurringDonors: month.recurringDonorsCount },
+      newDonorDetail: computeNewDonorDetail(month.newDonorsCount),
+      recurringDonorLevelBreakdown: computeRecurringDonorLevelBreakdown(month.recurringDonorsCount),
       impact: computeImpact(month.donationsCount, month.donationsCount * PEOPLE_HELPED_PER_DONATION),
       // La disponibilidad de turnos de la semana que viene es información de
       // "ahora": solo aplica cuando se está viendo el mes actual, no al mirar

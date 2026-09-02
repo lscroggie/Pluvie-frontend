@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Alert } from "@/lib/gerencial/types";
 import { DonationsBarChart } from "./DonationsBarChart";
+import { ChevronIcon } from "./icons";
 
 function AlertIcon({ className }: { className?: string }) {
   return (
@@ -10,14 +11,6 @@ function AlertIcon({ className }: { className?: string }) {
       <path d="M8 1.5 14.5 13h-13L8 1.5Z" strokeLinejoin="round" />
       <path d="M8 6v3.5" strokeLinecap="round" />
       <circle cx="8" cy="11.5" r="0.75" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function ChevronIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
-      <path d="M4.5 6 8 9.5 11.5 6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

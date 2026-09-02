@@ -134,6 +134,23 @@ export type SocialImpact = {
   livesHelped: number;
 };
 
+export type BloodTypeBreakdownItem = {
+  bloodType: BloodType;
+  count: number;
+};
+
+// Detalle de "Donantes nuevos" del período: sub-estado (ya donó por primera
+// vez vs. se registró pero todavía no donó) y por tipo de sangre. Mock: no
+// existe hoy un modelo de donante individual con estado de registro, así que
+// pendingCount se estima como proporción del grupo ya activado, y la
+// distribución por tipo de sangre reutiliza las proporciones institucionales
+// de bloodTypeDonorCounts en vez de derivarse del grupo real.
+export type NewDonorDetail = {
+  activatedCount: number;
+  pendingCount: number;
+  byBloodType: BloodTypeBreakdownItem[];
+};
+
 export type DashboardViewModel = {
   periodLabel: string;
   // Nombre del período contra el que se compara, listo para insertar en una
@@ -145,6 +162,9 @@ export type DashboardViewModel = {
     scheduledAppointments: KpiValue;
     attendanceRate: KpiValue;
   };
+  // Igual a donationTypeBreakdown, multiplicado por PEOPLE_HELPED_PER_DONATION.
+  // Sirve para explicar de dónde sale el KPI "Personas ayudadas".
+  peopleHelpedBreakdown: DonationTypeBreakdownItem[];
   chart: {
     title: string;
     points: ChartPoint[];
@@ -157,6 +177,12 @@ export type DashboardViewModel = {
   attendance: AttendanceBreakdown;
   notEligibleReasons: NotEligibleReason[];
   donorSegmentation: DonorSegmentation;
+  newDonorDetail: NewDonorDetail;
+  // Distribución por nivel Donate del grupo de donantes recurrentes del
+  // período. Mock: el nivel es histórico/de por vida (no hay un desglose
+  // real por período), así que se estima aplicando las proporciones
+  // institucionales de donorLevelCounts sobre donorSegmentation.recurringDonors.
+  recurringDonorLevelBreakdown: DonorLevelBreakdownItem[];
   impact: SocialImpact;
   alerts: Alert[];
   suggestions: Suggestion[];

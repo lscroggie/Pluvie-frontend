@@ -51,7 +51,13 @@ export function GerencialDashboard() {
       />
 
       <div className="mt-4">
-        <KpiGrid kpis={viewModel.kpis} periodKind={period.kind} />
+        <KpiGrid
+          kpis={viewModel.kpis}
+          periodKind={period.kind}
+          donationTypeBreakdown={viewModel.donationTypeBreakdown}
+          peopleHelpedBreakdown={viewModel.peopleHelpedBreakdown}
+          attendance={viewModel.attendance}
+        />
       </div>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-3">
@@ -78,7 +84,12 @@ export function GerencialDashboard() {
       </section>
 
       <section className="mt-4">
-        <SegmentationAndImpactSection donorSegmentation={viewModel.donorSegmentation} impact={viewModel.impact} />
+        <SegmentationAndImpactSection
+          donorSegmentation={viewModel.donorSegmentation}
+          newDonorDetail={viewModel.newDonorDetail}
+          recurringDonorLevelBreakdown={viewModel.recurringDonorLevelBreakdown}
+          impact={viewModel.impact}
+        />
       </section>
 
       <section className="mt-4 grid gap-3 lg:grid-cols-2">

@@ -1,12 +1,45 @@
-import type { DonorSegmentation, SocialImpact } from "@/lib/gerencial/types";
+import type { DonorLevelBreakdownItem, DonorSegmentation, NewDonorDetail, SocialImpact } from "@/lib/gerencial/types";
+import { DONOR_LEVEL_COLOR } from "./donorLevelColors";
 import { DropIcon, HeartIcon } from "./icons";
 import { KpiCard } from "./KpiCard";
+import { MiniBreakdownList } from "./MiniBreakdownList";
+
+function newDonorDetailContent(detail: NewDonorDetail) {
+  return (
+    <div className="space-y-2.5">
+      <MiniBreakdownList
+        title="Estado"
+        items={[
+          { label: "Ya donó (primera donación)", count: detail.activatedCount, dotClassName: "bg-brand-green" },
+          { label: "Registrado, todavía no donó", count: detail.pendingCount, dotClassName: "bg-zinc-400" },
+        ]}
+      />
+      <MiniBreakdownList
+        title="Por tipo de sangre"
+        items={detail.byBloodType.map((item) => ({ label: item.bloodType, count: item.count }))}
+      />
+    </div>
+  );
+}
+
+function recurringDonorLevelContent(items: DonorLevelBreakdownItem[]) {
+  return (
+    <MiniBreakdownList
+      title="Por nivel Donate"
+      items={items.map((item) => ({ label: item.label, count: item.count, dotClassName: DONOR_LEVEL_COLOR[item.id].dot }))}
+    />
+  );
+}
 
 export function SegmentationAndImpactSection({
   donorSegmentation,
+  newDonorDetail,
+  recurringDonorLevelBreakdown,
   impact,
 }: {
   donorSegmentation: DonorSegmentation;
+  newDonorDetail: NewDonorDetail;
+  recurringDonorLevelBreakdown: DonorLevelBreakdownItem[];
   impact: SocialImpact;
 }) {
   return (
@@ -16,8 +49,18 @@ export function SegmentationAndImpactSection({
           Segmentación de donantes
         </h2>
         <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-          <KpiCard label="Donantes nuevos" value={String(donorSegmentation.newDonors)} accent="violet" />
-          <KpiCard label="Donantes recurrentes" value={String(donorSegmentation.recurringDonors)} accent="charcoal" />
+          <KpiCard
+            label="Donantes nuevos"
+            value={String(donorSegmentation.newDonors)}
+            accent="violet"
+            detail={newDonorDetailContent(newDonorDetail)}
+          />
+          <KpiCard
+            label="Donantes recurrentes"
+            value={String(donorSegmentation.recurringDonors)}
+            accent="charcoal"
+            detail={recurringDonorLevelContent(recurringDonorLevelBreakdown)}
+          />
         </div>
       </div>
 
