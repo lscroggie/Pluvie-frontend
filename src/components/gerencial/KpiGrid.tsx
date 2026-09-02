@@ -88,7 +88,6 @@ export function KpiGrid({
         value={`${kpis.attendanceRate.value}%`}
         delta={kpis.attendanceRate.delta}
         accent="charcoal"
-        detail={attendanceDetail}
       />
       <KpiCard
         label="Turnos programados"
