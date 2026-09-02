@@ -38,6 +38,19 @@ export type MonthlyGerencialData = {
   scheduledAppointments: number;
   absenteeismCount: number;
   notEligibleCount: number;
+  // PENDIENTE (integración con backend real): weeklyDonations asume siempre
+  // un mes ya cerrado, repartiendo donationsCount entre 4 semanas con pesos
+  // fijos (ver splitIntoWeeks en data.ts). Si el mes actual llega del backend
+  // como un total parcial (mes todavía en curso), ese reparto le atribuiría
+  // datos a semanas que no ocurrieron todavía, y la media móvil / proyección
+  // de tendencia se calcularían sobre esa distribución inventada — mismo
+  // espíritu del problema que ya evitamos en la vista de año, pero acá
+  // ninguna semana da 0 explícito, así que es más difícil de notar. Antes de
+  // conectar datos reales, agregar algo como `elapsedWeeks: number` acá (o el
+  // nombre que se prefiera) para que weeklyDonations/movingAverage/
+  // linearRegressionProjection solo usen semanas realmente transcurridas del
+  // mes en curso. No se implementa todavía porque no hay forma honesta de
+  // mockear "semanas transcurridas" sin inventar un dato que no existe hoy.
   weeklyDonations: ChartPoint[];
   donationTypeCounts: Record<DonationTypeId, number>;
   // Segmentación simple de los donantes detrás de donationsCount. Mock: no

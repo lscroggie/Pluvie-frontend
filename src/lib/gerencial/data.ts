@@ -94,6 +94,11 @@ const MONTH_NAMES = [
 
 const MONTH_ABBR = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
+// PENDIENTE (integración con backend real): esta función asume que `total`
+// es el dato final de un mes ya cerrado y siempre devuelve 4 semanas
+// pobladas. Si en el futuro el mes en curso llega como total parcial, hay
+// que dejar de llamarla así — ver el comentario sobre `elapsedWeeks` en
+// MonthlyGerencialData (types.ts) para el detalle del problema.
 function splitIntoWeeks(total: number): ChartPoint[] {
   const weights = [0.24, 0.27, 0.23, 0.26];
   const counts = weights.slice(0, 3).map((w) => Math.round(total * w));
