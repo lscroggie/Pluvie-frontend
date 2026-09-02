@@ -35,21 +35,34 @@ function DeltaBadge({ delta }: { delta: KpiDelta }) {
 }
 
 export function KpiCard({
+  id,
   label,
   value,
   sublabel,
   delta,
+  badge,
   accent = "charcoal",
   icon,
   detail,
+  highlight = false,
 }: {
+  // Ancla opcional para navegación interna (ej. desde una alerta con
+  // scrollIntoView), no afecta el estilo ni el comportamiento de la card.
+  id?: string;
   label: string;
   value: string;
   sublabel?: string;
   delta?: KpiDelta;
+  // Slot para un <Badge tone="..."> cuando el estado es semántico (ej.
+  // severidad de alertas) en vez de una variación numérica vs. período anterior.
+  badge?: ReactNode;
   accent?: "violet" | "green" | "coral" | "charcoal";
   icon?: ReactNode;
   detail?: ReactNode;
+  // Métrica North Star: mismo fondo blanco que el resto (ver fix previo que
+  // sacó el violeta sólido de las cards destacadas), solo se remarca con un
+  // borde violeta y un valor más grande.
+  highlight?: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -64,22 +77,29 @@ export function KpiCard({
           />
         )}
       </p>
-      <p className={`mt-1 text-xl font-bold leading-none ${ACCENT_TEXT[accent]}`}>{value}</p>
+      <p
+        className={`mt-1 font-bold leading-none ${highlight ? "text-3xl" : "text-xl"} ${ACCENT_TEXT[accent]}`}
+      >
+        {value}
+      </p>
       {delta && <DeltaBadge delta={delta} />}
+      {badge && <div className="mt-1.5">{badge}</div>}
       {sublabel && <p className="mt-1 text-xs text-zinc-400">{sublabel}</p>}
     </>
   );
 
+  const borderClass = highlight ? "border-2 border-brand-violet/40" : "border border-zinc-200";
+
   if (!detail) {
     return (
-      <div className="rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:bg-brand-violet/10">
+      <div id={id} className={`rounded-lg ${borderClass} bg-white p-3 transition-colors hover:bg-brand-violet/10`}>
         {body}
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white transition-colors hover:bg-brand-violet/10">
+    <div id={id} className={`rounded-lg ${borderClass} bg-white transition-colors hover:bg-brand-violet/10`}>
       <button
         type="button"
         onClick={() => setIsExpanded((prev) => !prev)}

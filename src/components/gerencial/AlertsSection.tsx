@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getAlertNavigationTarget } from "@/lib/gerencial/alertNavigation";
 import type { Alert } from "@/lib/gerencial/types";
 import { DonationsBarChart } from "./DonationsBarChart";
 import { ChevronIcon } from "./icons";
@@ -15,7 +16,15 @@ function AlertIcon({ className }: { className?: string }) {
   );
 }
 
-export function AlertsSection({ alerts }: { alerts: Alert[] }) {
+export function AlertsSection({
+  alerts,
+  onNavigate,
+}: {
+  alerts: Alert[];
+  // Navegación interna a la sección donde vive el dato de la alerta — nunca
+  // dispara envíos ni notificaciones, ver getAlertNavigationTarget.
+  onNavigate: (alertId: string) => void;
+}) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (alerts.length === 0) return null;
@@ -28,6 +37,7 @@ export function AlertsSection({ alerts }: { alerts: Alert[] }) {
       <div className="mt-3 space-y-2">
         {alerts.map((alert) => {
           const isExpanded = expandedId === alert.id;
+          const navTarget = getAlertNavigationTarget(alert.id);
           return (
             <div key={alert.id} className="rounded-xl border border-brand-coral/50 bg-brand-coral/10">
               <button
@@ -42,6 +52,18 @@ export function AlertsSection({ alerts }: { alerts: Alert[] }) {
                   className={`mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-coral transition-transform ${isExpanded ? "rotate-180" : ""}`}
                 />
               </button>
+
+              {navTarget && (
+                <div className="px-3 pb-2.5">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate(alert.id)}
+                    className="text-xs font-medium text-brand-violet hover:underline"
+                  >
+                    {navTarget.label} →
+                  </button>
+                </div>
+              )}
 
               {isExpanded && (
                 <div className="px-3 pb-3">
