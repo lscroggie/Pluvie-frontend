@@ -92,6 +92,7 @@ export function GerencialDashboard() {
           points={viewModel.chart.points}
           projection={viewModel.chart.projection}
           annotations={period.kind === "month" ? SAMPLE_CHART_ANNOTATIONS : []}
+          variant="line"
         />
       </div>
 
