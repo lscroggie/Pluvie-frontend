@@ -36,8 +36,8 @@ export function SegmentationAndImpactSection({
             label="Vidas ayudadas"
             value={impact.livesHelped.toLocaleString("es-AR")}
             sublabel="Multiplicador 3x"
-            icon={<HeartIcon className="h-3.5 w-3.5 text-white/80" />}
-            highlighted
+            icon={<HeartIcon className="h-3.5 w-3.5 text-brand-violet" />}
+            accent="violet"
           />
         </div>
       </div>

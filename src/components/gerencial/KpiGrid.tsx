@@ -27,7 +27,7 @@ export function KpiGrid({
         value={kpis.peopleHelped.value.toLocaleString("es-AR")}
         delta={kpis.peopleHelped.delta}
         sublabel="Multiplicador 3x"
-        highlighted
+        accent="violet"
       />
       <KpiCard
         label="Turnos programados"

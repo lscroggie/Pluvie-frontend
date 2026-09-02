@@ -8,14 +8,12 @@ const ACCENT_TEXT: Record<string, string> = {
   charcoal: "text-brand-charcoal",
 };
 
-function DeltaBadge({ delta, light = false }: { delta: KpiDelta; light?: boolean }) {
+function DeltaBadge({ delta }: { delta: KpiDelta }) {
   if (delta.direction === "neutral") {
     return (
       <div className="mt-1.5 flex items-center gap-1.5">
-        <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${light ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-600"}`}>
-          {delta.text}
-        </span>
-        <span className={`text-[10px] ${light ? "text-white/60" : "text-zinc-400"}`}>vs mes anterior</span>
+        <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-600">{delta.text}</span>
+        <span className="text-[10px] text-zinc-400">vs mes anterior</span>
       </div>
     );
   }
@@ -28,7 +26,7 @@ function DeltaBadge({ delta, light = false }: { delta: KpiDelta; light?: boolean
       <span className={`rounded-md px-2 py-0.5 text-xs font-semibold text-white ${colorClass}`}>
         {arrow} {delta.text}
       </span>
-      <span className={`text-[10px] ${light ? "text-white/60" : "text-zinc-400"}`}>vs mes anterior</span>
+      <span className="text-[10px] text-zinc-400">vs mes anterior</span>
     </div>
   );
 }
@@ -39,7 +37,6 @@ export function KpiCard({
   sublabel,
   delta,
   accent = "charcoal",
-  highlighted = false,
   icon,
 }: {
   label: string;
@@ -47,23 +44,8 @@ export function KpiCard({
   sublabel?: string;
   delta?: KpiDelta;
   accent?: "violet" | "green" | "coral" | "charcoal";
-  highlighted?: boolean;
   icon?: ReactNode;
 }) {
-  if (highlighted) {
-    return (
-      <div className="rounded-lg bg-brand-violet p-3 transition-colors hover:bg-brand-violet-dark">
-        <p className="flex items-center gap-1.5 text-xs font-medium text-white/80">
-          {icon}
-          {label}
-        </p>
-        <p className="mt-1 text-xl font-bold leading-none text-white">{value}</p>
-        {delta && <DeltaBadge delta={delta} light />}
-        {sublabel && <p className="mt-1 text-xs text-white/70">{sublabel}</p>}
-      </div>
-    );
-  }
-
   return (
     <div className="rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:bg-brand-violet/10">
       <p className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
