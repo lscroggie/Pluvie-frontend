@@ -97,21 +97,20 @@ function makeProjectedDot(projectionLabel: string | undefined) {
 function LineTooltip({
   active,
   payload,
-  label,
   metricLabel,
 }: {
   active?: boolean;
   payload?: { dataKey: string; value: number | null }[];
-  label?: string;
   metricLabel: string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
   const point = payload.find((item) => item.value != null);
   if (!point) return null;
 
+  // El label del período (ej. "Sem 2") no se repite acá: ya se lee justo
+  // debajo del punto que se está hovereando, en el eje X.
   return (
     <div className="rounded-lg border border-zinc-100 bg-white px-3 py-2 shadow-lg">
-      <p className="text-xs font-medium text-zinc-500">{label}</p>
       <p className="text-sm font-semibold text-brand-charcoal">
         {metricLabel}: {formatNumber(point.value)}
       </p>
