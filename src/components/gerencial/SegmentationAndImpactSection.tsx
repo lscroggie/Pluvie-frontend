@@ -10,12 +10,12 @@ export function SegmentationAndImpactSection({
   impact: SocialImpact;
 }) {
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-3 lg:grid-cols-2">
       <div>
         <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
           Segmentación de donantes
         </h2>
-        <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="mt-2.5 grid grid-cols-2 gap-2.5">
           <KpiCard label="Donantes nuevos" value={String(donorSegmentation.newDonors)} accent="violet" />
           <KpiCard label="Donantes recurrentes" value={String(donorSegmentation.recurringDonors)} accent="charcoal" />
         </div>
@@ -25,7 +25,7 @@ export function SegmentationAndImpactSection({
         <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
           Impacto social
         </h2>
-        <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="mt-2.5 grid grid-cols-2 gap-2.5">
           <KpiCard
             label="Litros de sangre donados"
             value={`${impact.litersOfBlood.toLocaleString("es-AR")} L`}

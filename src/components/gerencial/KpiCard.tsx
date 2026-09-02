@@ -11,7 +11,7 @@ const ACCENT_TEXT: Record<string, string> = {
 function DeltaBadge({ delta, light = false }: { delta: KpiDelta; light?: boolean }) {
   if (delta.direction === "neutral") {
     return (
-      <p className={`mt-2 text-xs font-medium ${light ? "text-white/70" : "text-zinc-400"}`}>
+      <p className={`mt-1 text-xs font-medium ${light ? "text-white/70" : "text-zinc-400"}`}>
         {delta.text} vs mes anterior
       </p>
     );
@@ -25,7 +25,7 @@ function DeltaBadge({ delta, light = false }: { delta: KpiDelta; light?: boolean
       : "text-brand-coral";
 
   return (
-    <p className={`mt-2 text-xs font-medium ${colorClass}`}>
+    <p className={`mt-1 text-xs font-medium ${colorClass}`}>
       {arrow} {delta.text} vs mes anterior
     </p>
   );
@@ -50,27 +50,27 @@ export function KpiCard({
 }) {
   if (highlighted) {
     return (
-      <div className="rounded-xl bg-brand-violet p-4 transition-colors hover:bg-brand-violet-dark">
+      <div className="rounded-lg bg-brand-violet p-3 transition-colors hover:bg-brand-violet-dark">
         <p className="flex items-center gap-1.5 text-xs font-medium text-white/80">
           {icon}
           {label}
         </p>
-        <p className="mt-1.5 text-2xl font-bold leading-none text-white">{value}</p>
+        <p className="mt-1 text-xl font-bold leading-none text-white">{value}</p>
         {delta && <DeltaBadge delta={delta} light />}
-        {sublabel && <p className="mt-1.5 text-xs text-white/70">{sublabel}</p>}
+        {sublabel && <p className="mt-1 text-xs text-white/70">{sublabel}</p>}
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:bg-zinc-50">
+    <div className="rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:bg-zinc-50">
       <p className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
         {icon}
         {label}
       </p>
-      <p className={`mt-1.5 text-2xl font-bold leading-none ${ACCENT_TEXT[accent]}`}>{value}</p>
+      <p className={`mt-1 text-xl font-bold leading-none ${ACCENT_TEXT[accent]}`}>{value}</p>
       {delta && <DeltaBadge delta={delta} />}
-      {sublabel && <p className="mt-1.5 text-xs text-zinc-400">{sublabel}</p>}
+      {sublabel && <p className="mt-1 text-xs text-zinc-400">{sublabel}</p>}
     </div>
   );
 }

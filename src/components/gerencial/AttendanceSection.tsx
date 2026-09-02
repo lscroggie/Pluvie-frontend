@@ -20,7 +20,7 @@ export function AttendanceSection({
         Turnos: desglose de estados
       </h2>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-2.5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard label="Turnos otorgados" value={String(total)} accent="charcoal" sublabel="Referencia" />
         <KpiCard
           label="Ausentismo"

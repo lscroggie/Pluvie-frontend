@@ -28,7 +28,7 @@ export function AlertsSection({ alerts }: { alerts: Alert[] }) {
   if (alerts.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
       <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
         Alertas
       </h2>

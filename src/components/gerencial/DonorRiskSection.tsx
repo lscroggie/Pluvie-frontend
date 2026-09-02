@@ -25,7 +25,7 @@ export function DonorRiskSection({
       <p className="mt-1 text-xs text-zinc-400">
         Sin donar hace más de {thresholdMonths} meses. No modifica su nivel Donate, que es permanente.
       </p>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      <div className="mt-2.5 grid gap-2.5 sm:grid-cols-2">
         <KpiCard
           label="Oro en riesgo"
           value={String(oroInactive)}

@@ -38,7 +38,7 @@ export function DonationsBarChart({
   const data = buildChartData(points, trend, projection);
 
   return (
-    <div className="h-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <div className="h-full rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
           {title}
