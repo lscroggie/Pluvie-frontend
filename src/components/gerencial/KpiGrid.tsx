@@ -1,16 +1,8 @@
-import type {
-  Alert,
-  AttendanceBreakdown,
-  DashboardViewModel,
-  DonationTypeBreakdownItem,
-  KpiTrendSeries,
-  Period,
-} from "@/lib/gerencial/types";
+import type { Alert, AttendanceBreakdown, DashboardViewModel, DonationTypeBreakdownItem, Period } from "@/lib/gerencial/types";
 import { Badge } from "./Badge";
 import { GERENCIAL_DONATION_COLOR } from "./donationTypeColors";
 import { KpiCard } from "./KpiCard";
 import { MiniBreakdownList } from "./MiniBreakdownList";
-import { Sparkline } from "./Sparkline";
 
 function donationsLabel(periodKind: Period["kind"]): string {
   if (periodKind === "month") return "Donaciones este mes";
@@ -59,7 +51,6 @@ export function KpiGrid({
   peopleHelpedBreakdown,
   attendance,
   alerts,
-  trends,
 }: {
   kpis: DashboardViewModel["kpis"];
   periodKind: Period["kind"];
@@ -67,9 +58,6 @@ export function KpiGrid({
   peopleHelpedBreakdown: DonationTypeBreakdownItem[];
   attendance: AttendanceBreakdown;
   alerts: Alert[];
-  // Serie mensual real de los últimos períodos, para la mini-tendencia de
-  // cada card — ver getKpiTrendSeries en data.ts.
-  trends: KpiTrendSeries;
 }) {
   const attendanceDetail = <MiniBreakdownList items={attendanceItems(attendance)} />;
   const tone = alertsTone(alerts.length);
@@ -83,7 +71,6 @@ export function KpiGrid({
         delta={kpis.donationsThisMonth.delta}
         accent="violet"
         highlight
-        sparkline={<Sparkline points={trends.donations} color="violet" />}
         detail={<MiniBreakdownList title="Por tipo de donación" items={donationTypeItems(donationTypeBreakdown)} />}
       />
       <KpiCard
@@ -92,7 +79,6 @@ export function KpiGrid({
         delta={kpis.peopleHelped.delta}
         sublabel="Multiplicador 3x"
         accent="violet"
-        sparkline={<Sparkline points={trends.peopleHelped} color="violet" />}
         detail={
           <MiniBreakdownList title="Por tipo de donación (× 3)" items={donationTypeItems(peopleHelpedBreakdown)} />
         }
@@ -102,7 +88,6 @@ export function KpiGrid({
         value={`${kpis.attendanceRate.value}%`}
         delta={kpis.attendanceRate.delta}
         accent="charcoal"
-        sparkline={<Sparkline points={trends.attendanceRate} color="charcoal" />}
         detail={attendanceDetail}
       />
       <KpiCard
@@ -110,7 +95,6 @@ export function KpiGrid({
         value={String(kpis.scheduledAppointments.value)}
         delta={kpis.scheduledAppointments.delta}
         accent="charcoal"
-        sparkline={<Sparkline points={trends.scheduledAppointments} color="charcoal" />}
         detail={attendanceDetail}
       />
       <KpiCard
@@ -122,7 +106,6 @@ export function KpiGrid({
             {alerts.length === 0 ? "Sin alertas" : alerts.length === 1 ? "1 activa" : `${alerts.length} activas`}
           </Badge>
         }
-        sparkline={<Sparkline points={trends.alertsCount} color="coral" />}
         detail={alerts.length > 0 ? alertsDetail(alerts) : undefined}
       />
     </div>

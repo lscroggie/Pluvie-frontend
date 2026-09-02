@@ -6,7 +6,6 @@ import {
   CURRENT_MONTH_KEY,
   formatLastSyncedAt,
   getDashboardViewModel,
-  getKpiTrendSeries,
   getLastSyncedAt,
   getPeriodOptions,
   INSTITUTION_NAME,
@@ -40,9 +39,6 @@ export function GerencialDashboard() {
   const [period, setPeriod] = useState<Period>({ kind: "month", monthKey: CURRENT_MONTH_KEY });
   const [lastSyncedAt] = useState(() => getLastSyncedAt());
   const viewModel = useMemo(() => getDashboardViewModel(period), [period]);
-  // Serie de sparklines: no depende del período seleccionado, siempre son
-  // los últimos meses reales del mock (ver getKpiTrendSeries en data.ts).
-  const kpiTrends = useMemo(() => getKpiTrendSeries(), []);
 
   // Navegación interna desde una alerta hacia la sección donde vive ese dato
   // (ver alertNavigation.ts) — solo scroll, nunca dispara envíos/notificaciones.
@@ -86,7 +82,6 @@ export function GerencialDashboard() {
           peopleHelpedBreakdown={viewModel.peopleHelpedBreakdown}
           attendance={viewModel.attendance}
           alerts={viewModel.alerts}
-          trends={kpiTrends}
         />
       </div>
 

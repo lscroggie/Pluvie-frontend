@@ -45,7 +45,6 @@ export function KpiCard({
   icon,
   detail,
   highlight = false,
-  sparkline,
 }: {
   // Ancla opcional para navegación interna (ej. desde una alerta con
   // scrollIntoView), no afecta el estilo ni el comportamiento de la card.
@@ -60,13 +59,10 @@ export function KpiCard({
   accent?: "violet" | "green" | "coral" | "charcoal";
   icon?: ReactNode;
   detail?: ReactNode;
-  // Métrica North Star: mismo fondo blanco que el resto (ver fix previo que
-  // sacó el violeta sólido de las cards destacadas), solo se remarca con un
-  // borde violeta y un valor más grande.
+  // Métrica North Star: mismo fondo blanco y mismo tamaño de valor que el
+  // resto (ver fix previo que sacó el violeta sólido, y el fix que igualó el
+  // tamaño de fuente entre las 5 KPI cards), solo se remarca con un borde violeta.
   highlight?: boolean;
-  // Slot para un <Sparkline> junto al valor principal (solo las 5 KPI cards
-  // de KpiGrid lo usan hoy).
-  sparkline?: ReactNode;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -81,12 +77,7 @@ export function KpiCard({
           />
         )}
       </p>
-      <div className="mt-1 flex items-end justify-between gap-2">
-        <p className={`font-bold leading-none ${highlight ? "text-3xl" : "text-xl"} ${ACCENT_TEXT[accent]}`}>
-          {value}
-        </p>
-        {sparkline}
-      </div>
+      <p className={`mt-1 text-xl font-bold leading-none ${ACCENT_TEXT[accent]}`}>{value}</p>
       {delta && <DeltaBadge delta={delta} />}
       {badge && <div className="mt-1.5">{badge}</div>}
       {sublabel && <p className="mt-1 text-xs text-zinc-400">{sublabel}</p>}

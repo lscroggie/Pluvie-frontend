@@ -14,7 +14,6 @@ import type {
   DonorLevelId,
   DonorSegmentation,
   KpiDelta,
-  KpiTrendSeries,
   MonthlyGerencialData,
   NewDonorDetail,
   NotEligibleReason,
@@ -413,36 +412,6 @@ function computeDonorLevelAlerts(month: MonthlyGerencialData, previous: MonthlyG
   }
 
   return alerts;
-}
-
-// Serie mensual real (los 8 meses del mock) para las mini-tendencias
-// (sparklines) de las 5 KPI cards principales — reutiliza monthlyData y la
-// misma computeAlerts que ya calcula las alertas reales, sin datos nuevos.
-// Es independiente del período seleccionado en el dashboard.
-export function getKpiTrendSeries(): KpiTrendSeries {
-  const donations: number[] = [];
-  const peopleHelped: number[] = [];
-  const scheduledAppointments: number[] = [];
-  const attendanceRate: number[] = [];
-  const alertsCount: number[] = [];
-
-  monthlyData.forEach((month, index) => {
-    const previous = monthlyData[index - 1];
-    donations.push(month.donationsCount);
-    peopleHelped.push(month.donationsCount * PEOPLE_HELPED_PER_DONATION);
-    scheduledAppointments.push(month.scheduledAppointments);
-    attendanceRate.push(
-      month.scheduledAppointments === 0
-        ? 0
-        : Math.round((1 - month.absenteeismCount / month.scheduledAppointments) * 100),
-    );
-    // slotAvailabilityAlerts queda afuera a propósito: es información de
-    // "turnos de la próxima semana", solo aplica al mes actual, no tiene
-    // sentido histórico mes a mes.
-    alertsCount.push(computeAlerts(month, previous).length);
-  });
-
-  return { donations, peopleHelped, scheduledAppointments, attendanceRate, alertsCount };
 }
 
 // Anotaciones de ejemplo para el gráfico de tendencia principal (vista de

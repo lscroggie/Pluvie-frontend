@@ -151,18 +151,6 @@ export type NewDonorDetail = {
   byBloodType: BloodTypeBreakdownItem[];
 };
 
-// Serie mensual (últimos meses reales del mock) para las mini-tendencias
-// (sparklines) de las 5 KPI cards principales. Independiente del período
-// seleccionado en el dashboard: siempre muestra la forma real de los últimos
-// meses, calculada con la misma lógica que ya usa cada KPI/alerta.
-export type KpiTrendSeries = {
-  donations: number[];
-  peopleHelped: number[];
-  scheduledAppointments: number[];
-  attendanceRate: number[];
-  alertsCount: number[];
-};
-
 // Anotación de ejemplo sobre un punto del gráfico de tendencia (ej. "Sem 2").
 // Placeholder ilustrativo hasta que exista un campo real de eventos cargado
 // por gerencial — ver SAMPLE_CHART_ANNOTATIONS en data.ts.
