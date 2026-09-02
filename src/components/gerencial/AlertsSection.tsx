@@ -36,7 +36,7 @@ export function AlertsSection({ alerts }: { alerts: Alert[] }) {
         {alerts.map((alert) => {
           const isExpanded = expandedId === alert.id;
           return (
-            <div key={alert.id} className="rounded-2xl border border-brand-coral/30 bg-brand-coral/5">
+            <div key={alert.id} className="rounded-2xl border border-brand-coral/50 bg-brand-coral/10">
               <button
                 type="button"
                 onClick={() => setExpandedId(isExpanded ? null : alert.id)}
@@ -52,7 +52,7 @@ export function AlertsSection({ alerts }: { alerts: Alert[] }) {
 
               {isExpanded && (
                 <div className="px-4 pb-4">
-                  <DonationsBarChart title={alert.detailTitle} points={alert.weeklyBreakdown} />
+                  <DonationsBarChart title={alert.detailTitle} points={alert.breakdown} />
                 </div>
               )}
             </div>

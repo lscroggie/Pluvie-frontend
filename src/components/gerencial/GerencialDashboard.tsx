@@ -20,6 +20,8 @@ import { DashboardHeader } from "./DashboardHeader";
 import { DonationsChartSection } from "./DonationsChartSection";
 import { DonorLevelsSection } from "./DonorLevelsSection";
 import { KpiGrid } from "./KpiGrid";
+import { SegmentationAndImpactSection } from "./SegmentationAndImpactSection";
+import { SuggestionsSection } from "./SuggestionsSection";
 
 const periodOptions = getPeriodOptions();
 
@@ -41,6 +43,8 @@ export function GerencialDashboard() {
 
       <AlertsSection alerts={viewModel.alerts} />
 
+      <SuggestionsSection suggestions={viewModel.suggestions} />
+
       <div className="mt-6">
         <KpiGrid kpis={viewModel.kpis} periodKind={period.kind} />
       </div>
@@ -51,6 +55,10 @@ export function GerencialDashboard() {
 
       <section className="mt-6">
         <AttendanceSection data={viewModel.attendance} />
+      </section>
+
+      <section className="mt-6">
+        <SegmentationAndImpactSection donorSegmentation={viewModel.donorSegmentation} impact={viewModel.impact} />
       </section>
 
       <section className="mt-6">

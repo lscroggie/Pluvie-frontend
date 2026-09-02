@@ -33,6 +33,12 @@ export type MonthlyGerencialData = {
   notEligibleCount: number;
   weeklyDonations: ChartPoint[];
   donationTypeCounts: Record<DonationTypeId, number>;
+  // Segmentación simple de los donantes detrás de donationsCount. Mock: no
+  // existe hoy un modelo de donante individual con historial, así que se
+  // estima como proporción fija del total en vez de derivarse de datos reales
+  // por donante.
+  newDonorsCount: number;
+  recurringDonorsCount: number;
 };
 
 export type Period = { kind: "month"; monthKey: string } | { kind: "year"; year: number } | { kind: "historic" };
@@ -57,7 +63,19 @@ export type Alert = {
   message: string;
   shortLabel: string; // versión corta en minúscula, para insertar en el resumen ejecutivo (ej. "ausentismo")
   detailTitle: string; // título del desglose al expandir la alerta (ej. "Ausentismo por semana — Julio 2026")
-  weeklyBreakdown: ChartPoint[];
+  // Puntos del gráfico de desglose al expandir. Según el tipo de alerta puede
+  // ser semanal (ausentismo, caída de donaciones), mensual (tendencia de
+  // nivel de donantes) o una comparación puntual (turnos reservados vs.
+  // capacidad) — siempre son datos reales ya calculados, nunca proyectados.
+  breakdown: ChartPoint[];
+};
+
+// Sugerencia accionable derivada de una regla simple sobre datos ya
+// existentes (ej. baja disponibilidad de turnos de un tipo). No es una
+// predicción ni sale de un modelo: es texto honesto sobre lo que ya sabemos.
+export type Suggestion = {
+  id: string;
+  message: string;
 };
 
 export type DonorLevelId = "bronce" | "plata" | "oro" | "diamante";
@@ -66,6 +84,20 @@ export type DonorLevelBreakdownItem = {
   id: DonorLevelId;
   label: string;
   count: number;
+};
+
+// Donantes nuevos (primera donación efectiva dentro del período) vs.
+// recurrentes (ya habían donado antes del período seleccionado).
+export type DonorSegmentation = {
+  newDonors: number;
+  recurringDonors: number;
+};
+
+// Versión simple del impacto 3x ya usado en el KPI "Personas ayudadas",
+// sin ponerle valor monetario.
+export type SocialImpact = {
+  litersOfBlood: number;
+  livesHelped: number;
 };
 
 export type DashboardViewModel = {
@@ -85,5 +117,8 @@ export type DashboardViewModel = {
   };
   donationTypeBreakdown: DonationTypeBreakdownItem[];
   attendance: AttendanceBreakdown;
+  donorSegmentation: DonorSegmentation;
+  impact: SocialImpact;
   alerts: Alert[];
+  suggestions: Suggestion[];
 };
