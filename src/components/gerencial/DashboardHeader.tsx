@@ -21,12 +21,12 @@ export function DashboardHeader({
     <div className="flex items-start justify-between gap-4">
       <div>
         <h1
-          className="text-2xl font-semibold text-brand-charcoal"
+          className="text-xl font-semibold text-brand-charcoal"
           style={{ fontFamily: "var(--font-poppins)" }}
         >
           Dashboard
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">Vista general · {periodLabel}</p>
+        <p className="mt-0.5 text-xs text-zinc-500">Vista general · {periodLabel}</p>
       </div>
       <div className="flex items-center gap-3">
         <PeriodSelector options={periodOptions} value={periodValue} onChange={onPeriodChange} />

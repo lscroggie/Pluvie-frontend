@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { KpiDelta } from "@/lib/gerencial/types";
 
 const ACCENT_TEXT: Record<string, string> = {
@@ -37,6 +38,7 @@ export function KpiCard({
   delta,
   accent = "charcoal",
   highlighted = false,
+  icon,
 }: {
   label: string;
   value: string;
@@ -44,24 +46,31 @@ export function KpiCard({
   delta?: KpiDelta;
   accent?: "violet" | "green" | "coral" | "charcoal";
   highlighted?: boolean;
+  icon?: ReactNode;
 }) {
   if (highlighted) {
     return (
-      <div className="rounded-2xl bg-brand-violet p-5">
-        <p className="text-sm font-medium text-white/80">{label}</p>
-        <p className="mt-2 text-3xl font-bold leading-none text-white">{value}</p>
+      <div className="rounded-xl bg-brand-violet p-4">
+        <p className="flex items-center gap-1.5 text-xs font-medium text-white/80">
+          {icon}
+          {label}
+        </p>
+        <p className="mt-1.5 text-2xl font-bold leading-none text-white">{value}</p>
         {delta && <DeltaBadge delta={delta} light />}
-        {sublabel && <p className="mt-2 text-xs text-white/70">{sublabel}</p>}
+        {sublabel && <p className="mt-1.5 text-xs text-white/70">{sublabel}</p>}
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-      <p className="text-sm font-medium text-zinc-500">{label}</p>
-      <p className={`mt-2 text-3xl font-bold leading-none ${ACCENT_TEXT[accent]}`}>{value}</p>
+    <div className="rounded-xl border border-zinc-200 bg-white p-4">
+      <p className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
+        {icon}
+        {label}
+      </p>
+      <p className={`mt-1.5 text-2xl font-bold leading-none ${ACCENT_TEXT[accent]}`}>{value}</p>
       {delta && <DeltaBadge delta={delta} />}
-      {sublabel && <p className="mt-2 text-xs text-zinc-400">{sublabel}</p>}
+      {sublabel && <p className="mt-1.5 text-xs text-zinc-400">{sublabel}</p>}
     </div>
   );
 }

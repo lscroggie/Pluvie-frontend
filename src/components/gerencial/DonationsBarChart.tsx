@@ -38,15 +38,15 @@ export function DonationsBarChart({
   const data = buildChartData(points, trend, projection);
 
   return (
-    <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <div className="h-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
+        <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
           {title}
         </h2>
         {projection && <span className="text-xs text-zinc-400">Incluye estimación del próximo período</span>}
       </div>
 
-      <div className="mt-6 h-56">
+      <div className="mt-4 h-48">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 20, right: 4, left: 0, bottom: 0 }} barCategoryGap="30%">
             <defs>

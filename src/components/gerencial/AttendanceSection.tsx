@@ -16,11 +16,11 @@ export function AttendanceSection({
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
+      <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
         Turnos: desglose de estados
       </h2>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard label="Turnos otorgados" value={String(total)} accent="charcoal" sublabel="Referencia" />
         <KpiCard
           label="Ausentismo"
@@ -43,13 +43,13 @@ export function AttendanceSection({
       </div>
 
       {data.notEligibleCount > 0 && notEligibleReasons.length > 0 && (
-        <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4">
+        <div className="mt-3 rounded-xl border border-zinc-200 bg-white p-3.5">
           <p className="text-xs font-medium text-zinc-500">
             Motivos de &ldquo;asistió pero no pudo donar&rdquo; (registrados por el staff)
           </p>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-2 space-y-1.5">
             {notEligibleReasons.map((reason) => (
-              <li key={reason.label} className="flex items-center justify-between text-sm">
+              <li key={reason.label} className="flex items-center justify-between text-xs">
                 <span className="text-zinc-700">{reason.label}</span>
                 <span className="font-semibold text-zinc-700">
                   {reason.count} · {pct(reason.count, data.notEligibleCount)}

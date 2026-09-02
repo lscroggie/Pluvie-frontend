@@ -27,19 +27,19 @@ export function BloodTypeNeedSection() {
   }
 
   return (
-    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
         Necesidad de tipo de sangre específico
       </h2>
       <p className="mt-1 text-xs text-zinc-400">
         Lo carga gerencial a mano — Pluvie no lo detecta ni lo predice.
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-2.5">
         <select
           value={selectedType}
           onChange={(event) => setSelectedType(event.target.value as BloodType | "")}
-          className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-brand-charcoal"
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-brand-charcoal"
         >
           <option value="">Seleccioná un tipo</option>
           {BLOOD_TYPES.map((type) => (
@@ -53,21 +53,21 @@ export function BloodTypeNeedSection() {
           type="button"
           onClick={handleNotify}
           disabled={!selectedType}
-          className="rounded-xl bg-brand-violet px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg bg-brand-violet px-3 py-1.5 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           Notificar donantes
         </button>
       </div>
 
       {selectedType && donorCount !== null && (
-        <p className="mt-3 text-sm text-zinc-700">
+        <p className="mt-2.5 text-xs text-zinc-700">
           Tenés <span className="font-semibold">{donorCount}</span> donantes {selectedType} registrados.
         </p>
       )}
 
       {toastMessage && (
-        <div className="mt-4 flex items-start justify-between gap-3 rounded-2xl border border-brand-green/40 bg-brand-green/10 px-4 py-3">
-          <p className="text-sm text-brand-charcoal">{toastMessage}</p>
+        <div className="mt-3 flex items-start justify-between gap-2.5 rounded-xl border border-brand-green/40 bg-brand-green/10 px-3 py-2.5">
+          <p className="text-xs text-brand-charcoal">{toastMessage}</p>
           <button
             type="button"
             onClick={() => setToastMessage(null)}

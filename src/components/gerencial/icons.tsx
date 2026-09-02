@@ -8,6 +8,14 @@ export function DropIcon({ className }: IconProps) {
   );
 }
 
+export function HeartIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" className={className}>
+      <path d="M8 14 2.6 8.9a3.6 3.6 0 0 1 0-5.24 3.85 3.85 0 0 1 5.28 0L8 3.8l.12-.14a3.85 3.85 0 0 1 5.28 0 3.6 3.6 0 0 1 0 5.24L8 14Z" />
+    </svg>
+  );
+}
+
 export function DashboardIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>

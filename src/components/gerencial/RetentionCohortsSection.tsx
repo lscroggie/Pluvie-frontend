@@ -10,18 +10,18 @@ export function RetentionCohortsSection({
   if (!visible || cohorts.length === 0) return null;
 
   return (
-    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
+        <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
           Retención de donantes nuevos
         </h2>
         <span className="text-xs text-zinc-400">% que volvió a donar dentro de 3 meses</span>
       </div>
 
-      <ul className="mt-5 space-y-3">
+      <ul className="mt-3 space-y-2">
         {cohorts.map((cohort) => (
           <li key={cohort.monthKey}>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs">
               <span className="font-medium text-zinc-700">{cohort.monthLabel}</span>
               <span className="font-semibold text-zinc-700">
                 {cohort.returnedWithin3Months} de {cohort.firstTimeDonors} · {cohort.returnRatePct}%

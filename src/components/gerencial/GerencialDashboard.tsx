@@ -23,7 +23,8 @@ import { AttendanceSection } from "./AttendanceSection";
 import { BloodTypeNeedSection } from "./BloodTypeNeedSection";
 import { DashboardFooter } from "./DashboardFooter";
 import { DashboardHeader } from "./DashboardHeader";
-import { DonationsChartSection } from "./DonationsChartSection";
+import { DonationsBarChart } from "./DonationsBarChart";
+import { DonationTypeBreakdown } from "./DonationTypeBreakdown";
 import { DonorLevelsSection } from "./DonorLevelsSection";
 import { DonorRiskSection } from "./DonorRiskSection";
 import { KpiGrid } from "./KpiGrid";
@@ -39,7 +40,7 @@ export function GerencialDashboard() {
   const viewModel = useMemo(() => getDashboardViewModel(period), [period]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-6 py-8">
+    <div className="mx-auto w-full max-w-6xl px-6 py-8">
       <DashboardHeader
         periodLabel={viewModel.periodLabel}
         periodOptions={periodOptions}
@@ -49,36 +50,44 @@ export function GerencialDashboard() {
         institutionName={INSTITUTION_NAME}
       />
 
-      <AlertsSection alerts={viewModel.alerts} />
-
-      <SuggestionsSection suggestions={viewModel.suggestions} />
-
-      <div className="mt-6">
+      <div className="mt-5">
         <KpiGrid kpis={viewModel.kpis} periodKind={period.kind} />
       </div>
 
-      <div className="mt-6">
-        <DonationsChartSection chart={viewModel.chart} donationTypeBreakdown={viewModel.donationTypeBreakdown} />
+      <div className="mt-5 grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <DonationsBarChart
+            title={viewModel.chart.title}
+            points={viewModel.chart.points}
+            trend={viewModel.chart.trend}
+            projection={viewModel.chart.projection}
+          />
+        </div>
+        <div className="flex flex-col gap-4">
+          <AlertsSection alerts={viewModel.alerts} />
+          <SuggestionsSection suggestions={viewModel.suggestions} />
+          <DonationTypeBreakdown items={viewModel.donationTypeBreakdown} />
+        </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5">
         <BloodTypeNeedSection />
       </div>
 
-      <section className="mt-6">
+      <section className="mt-5">
         <AttendanceSection data={viewModel.attendance} notEligibleReasons={viewModel.notEligibleReasons} />
       </section>
 
-      <section className="mt-6">
+      <section className="mt-5">
         <SegmentationAndImpactSection donorSegmentation={viewModel.donorSegmentation} impact={viewModel.impact} />
       </section>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-2">
+      <section className="mt-5 grid gap-4 lg:grid-cols-2">
         <DonorLevelsSection visible={period.kind === "historic"} items={donorLevelCounts} />
         <RetentionCohortsSection visible={period.kind === "historic"} cohorts={retentionCohorts} />
       </section>
 
-      <section className="mt-6">
+      <section className="mt-5">
         <DonorRiskSection
           visible={period.kind === "historic"}
           thresholdMonths={HIGH_LEVEL_INACTIVITY_THRESHOLD_MONTHS}

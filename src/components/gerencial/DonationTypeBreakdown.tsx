@@ -5,12 +5,12 @@ export function DonationTypeBreakdown({ items }: { items: DonationTypeBreakdownI
   const total = items.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <div className="h-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
+    <div className="h-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
         Por tipo de donación
       </h2>
 
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-3 space-y-2">
         {items.map((item) => {
           const color = GERENCIAL_DONATION_COLOR[item.id];
           const pct = total === 0 ? 0 : Math.round((item.count / total) * 100);

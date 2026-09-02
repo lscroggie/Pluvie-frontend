@@ -13,18 +13,18 @@ export function SuggestionsSection({ suggestions }: { suggestions: Suggestion[] 
   if (suggestions.length === 0) return null;
 
   return (
-    <section className="mt-6">
-      <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
         Sugerencias
       </h2>
-      <div className="mt-4 space-y-2">
+      <div className="mt-3 space-y-2">
         {suggestions.map((suggestion) => (
           <div
             key={suggestion.id}
-            className="flex items-start gap-3 rounded-2xl border border-brand-violet/40 bg-brand-violet/10 px-4 py-3"
+            className="flex items-start gap-2.5 rounded-xl border border-brand-violet/40 bg-brand-violet/10 px-3 py-2.5"
           >
-            <LightbulbIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand-violet" />
-            <p className="flex-1 text-sm text-brand-charcoal">{suggestion.message}</p>
+            <LightbulbIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-violet" />
+            <p className="flex-1 text-xs text-brand-charcoal">{suggestion.message}</p>
           </div>
         ))}
       </div>

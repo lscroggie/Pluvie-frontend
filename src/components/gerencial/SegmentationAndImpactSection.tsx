@@ -1,4 +1,5 @@
 import type { DonorSegmentation, SocialImpact } from "@/lib/gerencial/types";
+import { DropIcon, HeartIcon } from "./icons";
 import { KpiCard } from "./KpiCard";
 
 export function SegmentationAndImpactSection({
@@ -9,27 +10,33 @@ export function SegmentationAndImpactSection({
   impact: SocialImpact;
 }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid gap-4 lg:grid-cols-2">
       <div>
-        <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
+        <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
           Segmentación de donantes
         </h2>
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-3 grid grid-cols-2 gap-3">
           <KpiCard label="Donantes nuevos" value={String(donorSegmentation.newDonors)} accent="violet" />
           <KpiCard label="Donantes recurrentes" value={String(donorSegmentation.recurringDonors)} accent="charcoal" />
         </div>
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
+        <h2 className="text-sm font-semibold text-brand-charcoal" style={{ fontFamily: "var(--font-poppins)" }}>
           Impacto social
         </h2>
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <KpiCard label="Litros de sangre donados" value={`${impact.litersOfBlood.toLocaleString("es-AR")} L`} accent="green" />
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <KpiCard
+            label="Litros de sangre donados"
+            value={`${impact.litersOfBlood.toLocaleString("es-AR")} L`}
+            accent="coral"
+            icon={<DropIcon className="h-3.5 w-3.5 text-brand-coral" />}
+          />
           <KpiCard
             label="Vidas ayudadas"
             value={impact.livesHelped.toLocaleString("es-AR")}
             sublabel="Multiplicador 3x"
+            icon={<HeartIcon className="h-3.5 w-3.5 text-white/80" />}
             highlighted
           />
         </div>
