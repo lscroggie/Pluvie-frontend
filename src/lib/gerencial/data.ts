@@ -59,9 +59,8 @@ const NOT_ELIGIBLE_REASON_SHARES: { label: string; share: number }[] = [
 // fija en vez de derivarse de datos reales por donante.
 const RETENTION_WITHIN_3_MONTHS_SHARE = 0.35;
 
-// Ventana de la media móvil de tendencia y cantidad de períodos reales que
-// se usan para la regresión lineal de la proyección del próximo período.
-const TREND_MOVING_AVERAGE_WINDOW = 3;
+// Cantidad de períodos reales que se usan para la regresión lineal de la
+// proyección del próximo período.
 const PROJECTION_LOOKBACK = 6;
 const PROJECTION_LABEL = "Estimado";
 
@@ -127,18 +126,6 @@ function splitNotEligibleReasons(total: number): NotEligibleReason[] {
   return NOT_ELIGIBLE_REASON_SHARES.map((reason, index) => ({ label: reason.label, count: counts[index] }));
 }
 
-// Media móvil simple de tendencia: cada punto promedia hasta las últimas
-// TREND_MOVING_AVERAGE_WINDOW muestras reales (los primeros puntos, que
-// todavía no tienen ventana completa, promedian lo que haya disponible).
-function movingAverage(points: ChartPoint[]): ChartPoint[] {
-  return points.map((point, index) => {
-    const windowStart = Math.max(0, index - TREND_MOVING_AVERAGE_WINDOW + 1);
-    const window = points.slice(windowStart, index + 1);
-    const avg = window.reduce((sum, p) => sum + p.count, 0) / window.length;
-    return { label: point.label, count: Math.round(avg) };
-  });
-}
-
 // Proyección del próximo período por regresión lineal simple (mínimos
 // cuadrados) sobre los últimos PROJECTION_LOOKBACK puntos reales. Método
 // estadístico simple, no un modelo predictivo: solo extrapola la tendencia
@@ -162,10 +149,6 @@ function linearRegressionProjection(points: ChartPoint[]): ChartPoint | null {
   const nextValue = intercept + slope * n;
 
   return { label: PROJECTION_LABEL, count: Math.max(0, Math.round(nextValue)) };
-}
-
-function computeTrendAndProjection(points: ChartPoint[]): { trend: ChartPoint[]; projection: ChartPoint | null } {
-  return { trend: movingAverage(points), projection: linearRegressionProjection(points) };
 }
 
 function buildMonth(
@@ -497,7 +480,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
           delta: computeDelta(attendanceRate * 100, previousAttendanceRate && previousAttendanceRate * 100, "pp"),
         },
       },
-      chart: { title: "Donaciones por semana", points: month.weeklyDonations, ...computeTrendAndProjection(month.weeklyDonations) },
+      chart: { title: "Donaciones por semana", points: month.weeklyDonations, projection: linearRegressionProjection(month.weeklyDonations) },
       donationTypeBreakdown: toBreakdown(month.donationTypeCounts),
       attendance: toAttendance(month.scheduledAppointments, month.absenteeismCount, month.notEligibleCount, month.donationsCount),
       notEligibleReasons: splitNotEligibleReasons(month.notEligibleCount),
@@ -524,9 +507,9 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
       ...aggregateMonths(yearMonths),
       // La vista de año rellena con 0 los meses futuros del año en curso para
       // completar las 12 barras: no son datos reales, así que no se calcula
-      // tendencia/proyección acá (rompería la regresión y chocaría con el
-      // mes futuro ya mostrado en 0).
-      chart: { title: "Donaciones por mes", points, trend: [], projection: null },
+      // proyección acá (rompería la regresión y chocaría con el mes futuro
+      // ya mostrado en 0).
+      chart: { title: "Donaciones por mes", points, projection: null },
       // No hay un año anterior completo en los datos mock con el que comparar.
       alerts: [],
       suggestions: [],
@@ -541,7 +524,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
   return {
     periodLabel: "Histórico",
     ...aggregateMonths(monthlyData),
-    chart: { title: "Donaciones por mes", points, ...computeTrendAndProjection(points) },
+    chart: { title: "Donaciones por mes", points, projection: linearRegressionProjection(points) },
     // Un histórico no tiene un "período anterior" con el que compararse.
     alerts: [],
     suggestions: [],

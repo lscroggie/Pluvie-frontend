@@ -148,9 +148,6 @@ export type DashboardViewModel = {
   chart: {
     title: string;
     points: ChartPoint[];
-    // Media móvil sobre points, mismo largo y orden. Vacío cuando no aplica
-    // (ver projection).
-    trend: ChartPoint[];
     // Estimación del próximo período por regresión lineal simple sobre los
     // últimos períodos reales. null cuando no corresponde proyectar (ej. la
     // vista de año, que ya rellena meses futuros con 0 y rompería el cálculo).

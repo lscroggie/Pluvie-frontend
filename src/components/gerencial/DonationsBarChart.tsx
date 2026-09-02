@@ -1,24 +1,23 @@
 "use client";
 
-import { Bar, CartesianGrid, ComposedChart, LabelList, Line, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import type { ChartPoint } from "@/lib/gerencial/types";
 
 function formatNumber(value: unknown): string {
   return typeof value === "number" ? value.toLocaleString("es-AR") : String(value ?? "");
 }
 
-type ChartDatum = { label: string; actual: number | null; projected: number | null; trend: number | null };
+type ChartDatum = { label: string; actual: number | null; projected: number | null };
 
-function buildChartData(points: ChartPoint[], trend: ChartPoint[], projection: ChartPoint | null): ChartDatum[] {
-  const data: ChartDatum[] = points.map((point, index) => ({
+function buildChartData(points: ChartPoint[], projection: ChartPoint | null): ChartDatum[] {
+  const data: ChartDatum[] = points.map((point) => ({
     label: point.label,
     actual: point.count,
     projected: null,
-    trend: trend[index]?.count ?? null,
   }));
 
   if (projection) {
-    data.push({ label: projection.label, actual: null, projected: projection.count, trend: projection.count });
+    data.push({ label: projection.label, actual: null, projected: projection.count });
   }
 
   return data;
@@ -27,15 +26,13 @@ function buildChartData(points: ChartPoint[], trend: ChartPoint[], projection: C
 export function DonationsBarChart({
   title,
   points,
-  trend = [],
   projection = null,
 }: {
   title: string;
   points: ChartPoint[];
-  trend?: ChartPoint[];
   projection?: ChartPoint | null;
 }) {
-  const data = buildChartData(points, trend, projection);
+  const data = buildChartData(points, projection);
 
   return (
     <div className="h-full rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
@@ -48,7 +45,7 @@ export function DonationsBarChart({
 
       <div className="mt-4 h-48">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 20, right: 4, left: 0, bottom: 0 }} barCategoryGap="30%">
+          <BarChart data={data} margin={{ top: 20, right: 4, left: 0, bottom: 0 }} barCategoryGap="30%">
             <defs>
               <linearGradient id="donationsBarFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#8D7FF5" />
@@ -71,19 +68,6 @@ export function DonationsBarChart({
               width={40}
               allowDecimals={false}
             />
-            {/* La línea se declara antes que las barras para que quede dibujada
-                debajo: las barras y sus etiquetas numéricas siempre ganan el
-                z-order en SVG y quedan completamente legibles. */}
-            {trend.length > 0 && (
-              <Line
-                dataKey="trend"
-                stroke="#5A4BD1"
-                strokeWidth={2}
-                dot={false}
-                activeDot={false}
-                isAnimationActive={false}
-              />
-            )}
             <Bar dataKey="actual" fill="url(#donationsBarFill)" radius={[4, 4, 0, 0]} maxBarSize={24}>
               <LabelList
                 dataKey="actual"
@@ -115,7 +99,7 @@ export function DonationsBarChart({
                 />
               </Bar>
             )}
-          </ComposedChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>

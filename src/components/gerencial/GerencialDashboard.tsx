@@ -59,7 +59,6 @@ export function GerencialDashboard() {
           <DonationsBarChart
             title={viewModel.chart.title}
             points={viewModel.chart.points}
-            trend={viewModel.chart.trend}
             projection={viewModel.chart.projection}
           />
         </div>

@@ -11,23 +11,25 @@ const ACCENT_TEXT: Record<string, string> = {
 function DeltaBadge({ delta, light = false }: { delta: KpiDelta; light?: boolean }) {
   if (delta.direction === "neutral") {
     return (
-      <p className={`mt-1 text-xs font-medium ${light ? "text-white/70" : "text-zinc-400"}`}>
-        {delta.text} vs mes anterior
-      </p>
+      <div className="mt-1.5 flex items-center gap-1.5">
+        <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${light ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-600"}`}>
+          {delta.text}
+        </span>
+        <span className={`text-[10px] ${light ? "text-white/60" : "text-zinc-400"}`}>vs mes anterior</span>
+      </div>
     );
   }
 
   const arrow = delta.direction === "up" ? "↑" : "↓";
-  const colorClass = light
-    ? "text-white/90"
-    : delta.direction === "up"
-      ? "text-brand-green"
-      : "text-brand-coral";
+  const colorClass = delta.direction === "up" ? "bg-brand-green" : "bg-brand-coral";
 
   return (
-    <p className={`mt-1 text-xs font-medium ${colorClass}`}>
-      {arrow} {delta.text} vs mes anterior
-    </p>
+    <div className="mt-1.5 flex items-center gap-1.5">
+      <span className={`rounded-md px-2 py-0.5 text-xs font-semibold text-white ${colorClass}`}>
+        {arrow} {delta.text}
+      </span>
+      <span className={`text-[10px] ${light ? "text-white/60" : "text-zinc-400"}`}>vs mes anterior</span>
+    </div>
   );
 }
 
@@ -63,7 +65,7 @@ export function KpiCard({
   }
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:bg-zinc-50">
+    <div className="rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:bg-brand-violet/10">
       <p className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
         {icon}
         {label}
