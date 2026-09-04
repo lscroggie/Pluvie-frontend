@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { getActiveAppointment } from "@/lib/donor-booking/appointments";
 import { getDaySlots, getUpcomingDays } from "@/lib/donor-booking/availability";
-import type { Center, DaySlots } from "@/lib/donor-booking/types";
+import type { Center, DaySlots, DonationTypeId } from "@/lib/donor-booking/types";
 
 const DAY_LABEL = new Intl.DateTimeFormat("es-AR", { weekday: "short" });
 const MONTH_LABEL = new Intl.DateTimeFormat("es-AR", { month: "short" });
@@ -15,16 +16,21 @@ function statusLabel(day: DaySlots): string {
 
 export function StepSchedule({
   center,
+  donationTypeId,
   onSelect,
   onBack,
 }: {
   center: Center;
+  donationTypeId: DonationTypeId;
   onSelect: (date: Date, time: string) => void;
   onBack: () => void;
 }) {
   const days = useMemo(() => {
-    return getUpcomingDays(14).map((date) => getDaySlots(center, date));
-  }, [center]);
+    const activeAppointment = getActiveAppointment();
+    return getUpcomingDays(14).map((date) =>
+      getDaySlots(center, date, donationTypeId, activeAppointment),
+    );
+  }, [center, donationTypeId]);
 
   const firstOpenIndex = days.findIndex((d) => d.status !== "closed" && d.status !== "full");
   const [selectedDayIndex, setSelectedDayIndex] = useState(Math.max(0, firstOpenIndex));

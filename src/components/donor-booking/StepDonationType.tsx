@@ -1,5 +1,6 @@
 import { donationTypes } from "@/lib/donor-booking/data";
 import type { DonationTypeId } from "@/lib/donor-booking/types";
+import { DonationHoursLegend } from "./DonationHoursLegend";
 
 export function StepDonationType({
   onSelect,
@@ -12,6 +13,10 @@ export function StepDonationType({
       <p className="mt-1 text-sm text-zinc-500">
         Elegí el tipo de donación para ver los centros y turnos disponibles.
       </p>
+
+      <div className="mt-4">
+        <DonationHoursLegend />
+      </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         {donationTypes.map((type) => (

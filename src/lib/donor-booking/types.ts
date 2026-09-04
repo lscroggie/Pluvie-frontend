@@ -46,3 +46,11 @@ export type DaySlots = {
   totalCount: number;
   times: TimeSlot[];
 };
+
+// Franjas horarias reales del hospital piloto, por tipo de donación.
+export type DonationSchedule = {
+  startMinutes: number; // minutos desde 00:00
+  endMinutes: number;
+  slotEveryMinutes: number; // separación entre franjas dentro de la ventana
+  dailyCap?: number; // tope de turnos/día en total (aféresis); sin tope = 1 por franja
+};

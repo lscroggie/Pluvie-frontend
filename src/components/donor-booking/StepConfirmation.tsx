@@ -1,31 +1,10 @@
-import { donationTypes } from "@/lib/donor-booking/data";
-import type { Center, DonationTypeId, Locality } from "@/lib/donor-booking/types";
+"use client";
 
-const DATE_LABEL = new Intl.DateTimeFormat("es-AR", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-});
+import Link from "next/link";
+import { AppointmentSummary } from "./AppointmentSummary";
+import type { Appointment } from "@/lib/donor-booking/appointments";
 
-export function StepConfirmation({
-  donationTypeId,
-  locality,
-  center,
-  date,
-  time,
-  onRestart,
-}: {
-  donationTypeId: DonationTypeId;
-  locality: Locality;
-  center: Center;
-  date: Date;
-  time: string;
-  onRestart: () => void;
-}) {
-  const donationType = donationTypes.find((t) => t.id === donationTypeId)!;
-  const dateLabel = DATE_LABEL.format(date);
-  const capitalizedDateLabel = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
-
+export function StepConfirmation({ appointment }: { appointment: Appointment }) {
   return (
     <div>
       <div className="flex flex-col items-center text-center">
@@ -36,12 +15,8 @@ export function StepConfirmation({
         <p className="mt-1 text-sm text-zinc-500">Te esperamos en el centro elegido.</p>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-zinc-200 p-5">
-        <SummaryRow label="Tipo de donación" value={donationType.name} />
-        <SummaryRow label="Centro" value={center.name} sub={center.address} />
-        <SummaryRow label="Localidad buscada" value={locality.name} />
-        <SummaryRow label="Fecha" value={capitalizedDateLabel} />
-        <SummaryRow label="Horario" value={time} />
+      <div className="mt-6">
+        <AppointmentSummary appointment={appointment} />
       </div>
 
       <div className="mt-4 flex gap-3 rounded-2xl bg-brand-violet/5 p-4">
@@ -53,25 +28,12 @@ export function StepConfirmation({
         </p>
       </div>
 
-      <button
-        type="button"
-        onClick={onRestart}
-        className="mt-8 w-full rounded-full bg-brand-violet px-6 py-3 text-sm font-semibold text-white"
+      <Link
+        href="/perfil"
+        className="mt-8 block w-full rounded-full bg-brand-violet px-6 py-3 text-center text-sm font-semibold text-white"
       >
-        Reservar otro turno
-      </button>
-    </div>
-  );
-}
-
-function SummaryRow({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4">
-      <span className="text-sm text-zinc-500">{label}</span>
-      <span className="text-right text-sm font-medium text-zinc-900">
-        {value}
-        {sub && <span className="block text-xs font-normal text-zinc-400">{sub}</span>}
-      </span>
+        Ir a mi perfil
+      </Link>
     </div>
   );
 }
