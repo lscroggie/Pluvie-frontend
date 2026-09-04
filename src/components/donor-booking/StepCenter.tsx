@@ -5,6 +5,7 @@ import { centers, INSTITUTION_CENTER_IDS, localities } from "@/lib/donor-booking
 import { getInstitutionCenters } from "@/lib/donor-booking/availability";
 import { DONOR_LOCALITY_ID } from "@/lib/donor-profile/data";
 import type { CenterResult } from "@/lib/donor-booking/types";
+import { BackButton } from "./BackButton";
 
 export function StepCenter({
   onSelect,
@@ -42,13 +43,9 @@ export function StepCenter({
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-8 text-sm font-medium text-zinc-500 hover:text-zinc-800"
-      >
-        ← Volver
-      </button>
+      <div className="mt-8">
+        <BackButton onClick={onBack} />
+      </div>
     </div>
   );
 }

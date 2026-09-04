@@ -32,7 +32,7 @@ export function BookingFlow() {
   if (confirmedAppointment) {
     return (
       <div className="w-full">
-        <BookingHeader backHref="/perfil" />
+        <BookingHeader />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:py-16">
           <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
             <StepConfirmation appointment={confirmedAppointment} />
@@ -47,7 +47,7 @@ export function BookingFlow() {
   if (existingAppointment) {
     return (
       <div className="w-full">
-        <BookingHeader backHref="/perfil" />
+        <BookingHeader />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:py-16">
           <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
             <h2 className="text-xl font-semibold text-zinc-900">Ya tenés un turno reservado</h2>
@@ -70,7 +70,7 @@ export function BookingFlow() {
 
   return (
     <div className="w-full">
-      <BookingHeader backHref={stepIndex === 0 ? "/perfil" : undefined} />
+      <BookingHeader backHref={stepIndex === 0 ? "/" : undefined} />
 
       <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:py-16">
         <div className="mb-8">

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { getActiveAppointment } from "@/lib/donor-booking/appointments";
 import { getDaySlots, getUpcomingDays } from "@/lib/donor-booking/availability";
 import type { Center, DaySlots, DonationTypeId } from "@/lib/donor-booking/types";
+import { BackButton } from "./BackButton";
 
 const DAY_LABEL = new Intl.DateTimeFormat("es-AR", { weekday: "short" });
 const MONTH_LABEL = new Intl.DateTimeFormat("es-AR", { month: "short" });
@@ -129,13 +130,7 @@ export function StepSchedule({
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-sm font-medium text-zinc-500 hover:text-zinc-800"
-        >
-          ← Volver
-        </button>
+        <BackButton onClick={onBack} />
         <button
           type="button"
           disabled={!selectedTime}

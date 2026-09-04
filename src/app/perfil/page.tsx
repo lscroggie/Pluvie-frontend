@@ -15,11 +15,11 @@ export default function PerfilPage() {
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-zinc-50">
-      <BookingHeader />
+      <BookingHeader backHref="/" />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:py-12">
         <div className="flex items-start justify-between gap-3">
           <p className="text-3xl font-semibold text-zinc-900">Hola, {DONOR_NAME}</p>
-          <span className="mt-1 inline-flex shrink-0 items-center rounded-full bg-brand-violet px-3 py-1.5 text-sm font-bold text-white">
+          <span className="mt-1 inline-flex shrink-0 items-center rounded-full bg-brand-violet px-5 py-2.5 text-2xl font-extrabold leading-none text-white shadow-sm">
             {DONOR_BLOOD_TYPE}
           </span>
         </div>
