@@ -11,6 +11,11 @@ export const DONOR_NAME = "Julieta";
 // perfil autenticado / historia clínica.
 export const DONOR_BLOOD_TYPE = "O+";
 
+// Localidad mock del donante, usada solo para ordenar por cercanía los
+// centros de SU institución cuando tiene más de uno. En producción vendría
+// del perfil autenticado (no de geolocalización del dispositivo).
+export const DONOR_LOCALITY_ID = "caba";
+
 export const donations: Donation[] = [
   // Año anterior (2025)
   { id: "d0a", donationTypeId: "sangre-entera", date: "2025-03-11", centerName: "Centro de Donación Pluvie CABA" },

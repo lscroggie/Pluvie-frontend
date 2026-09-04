@@ -11,7 +11,6 @@ export type Appointment = {
   centerId: string;
   centerName: string;
   centerAddress: string;
-  localityName: string;
   dateStr: string; // YYYY-MM-DD
   time: string;
 };

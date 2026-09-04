@@ -29,30 +29,30 @@ export function haversineKm(a: { lat: number; lng: number }, b: { lat: number; l
 }
 
 /**
- * Busca centros para una localidad. Si la localidad no tiene centro propio,
- * nunca deja al donante sin opciones: devuelve los más cercanos ordenados
- * por distancia real (coordenadas fijas de cada centro).
+ * Centros de la institución del donante (Pluvie se vende institución por
+ * institución: nunca se listan centros de otras instituciones). Si se
+ * conoce la localidad del donante, se ordenan por cercanía real
+ * (coordenadas fijas de cada centro) — sin necesidad de que el donante
+ * busque ni escriba nada.
  */
-export function findCentersForLocality(
-  locality: Locality,
+export function getInstitutionCenters(
   centers: Center[],
-  maxFallbackResults = 4,
-): { hasHomeCenter: boolean; results: CenterResult[] } {
-  const homeCenters = centers.filter((c) => c.localityId === locality.id);
+  institutionCenterIds: string[],
+  donorLocality?: Locality,
+): CenterResult[] {
+  const institutionCenters = centers.filter((c) => institutionCenterIds.includes(c.id));
 
-  if (homeCenters.length > 0) {
-    return {
-      hasHomeCenter: true,
-      results: homeCenters.map((center) => ({ center, distanceKm: 0, isHome: true })),
-    };
+  if (!donorLocality) {
+    return institutionCenters.map((center) => ({ center, distanceKm: 0, isHome: false }));
   }
 
-  const ranked = centers
-    .map((center) => ({ center, distanceKm: haversineKm(locality, center), isHome: false }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, maxFallbackResults);
-
-  return { hasHomeCenter: false, results: ranked };
+  return institutionCenters
+    .map((center) => ({
+      center,
+      distanceKm: haversineKm(donorLocality, center),
+      isHome: center.localityId === donorLocality.id,
+    }))
+    .sort((a, b) => a.distanceKm - b.distanceKm);
 }
 
 function hashStr(str: string): number {
@@ -82,8 +82,20 @@ function mulberry32(seed: number) {
 // TODO: confirmar con el hospital piloto el rango horario exacto de plasma.
 export const DONATION_SCHEDULES: Record<DonationTypeId, DonationSchedule> = {
   "sangre-entera": { startMinutes: 8 * 60, endMinutes: 13 * 60 + 30, slotEveryMinutes: 5 },
-  plaquetas: { startMinutes: 8 * 60, endMinutes: 11 * 60, slotEveryMinutes: 5, dailyCap: 3 },
-  plasma: { startMinutes: 8 * 60, endMinutes: 11 * 60, slotEveryMinutes: 5, dailyCap: 3 },
+  plaquetas: {
+    startMinutes: 8 * 60,
+    endMinutes: 11 * 60,
+    slotEveryMinutes: 5,
+    minDailyCap: 2,
+    maxDailyCap: 4,
+  },
+  plasma: {
+    startMinutes: 8 * 60,
+    endMinutes: 11 * 60,
+    slotEveryMinutes: 5,
+    minDailyCap: 2,
+    maxDailyCap: 4,
+  },
 };
 
 function minutesToTime(minutes: number): string {
@@ -95,14 +107,15 @@ function minutesToTime(minutes: number): string {
 /**
  * Franjas horarias del día para un tipo de donación. Sangre entera admite
  * una franja cada 5 minutos en toda la ventana (hasta 1 turno por franja).
- * Plaquetas y plasma tienen un tope diario bajo (aféresis), así que en vez
- * de una grilla densa se ofrecen únicamente `dailyCap` franjas distribuidas
- * en la ventana disponible — también 1 turno por franja.
+ * Plaquetas y plasma tienen un tope diario bajo (aféresis): el total de
+ * franjas de ESE día (`dailyCount`) varía entre `minDailyCap` y
+ * `maxDailyCap` y se distribuye a lo largo de la ventana — también 1 turno
+ * por franja.
  */
-function buildTimeSlots(schedule: DonationSchedule): string[] {
-  const { startMinutes, endMinutes, slotEveryMinutes, dailyCap } = schedule;
+function buildTimeSlots(schedule: DonationSchedule, dailyCount?: number): string[] {
+  const { startMinutes, endMinutes, slotEveryMinutes } = schedule;
 
-  if (!dailyCap) {
+  if (!dailyCount) {
     const times: string[] = [];
     for (let m = startMinutes; m <= endMinutes; m += slotEveryMinutes) {
       times.push(minutesToTime(m));
@@ -111,14 +124,22 @@ function buildTimeSlots(schedule: DonationSchedule): string[] {
   }
 
   const span = endMinutes - startMinutes;
-  const step = dailyCap > 1 ? span / (dailyCap - 1) : 0;
+  const step = dailyCount > 1 ? span / (dailyCount - 1) : 0;
   const times: string[] = [];
-  for (let i = 0; i < dailyCap; i++) {
+  for (let i = 0; i < dailyCount; i++) {
     const raw = startMinutes + i * step;
     const rounded = Math.round(raw / slotEveryMinutes) * slotEveryMinutes;
     times.push(minutesToTime(rounded));
   }
   return times;
+}
+
+/** Cuántos turnos totales tiene ESE día, para tipos con tope diario variable. */
+function resolveDailyCount(schedule: DonationSchedule, seedKey: string): number | undefined {
+  if (!schedule.minDailyCap || !schedule.maxDailyCap) return undefined;
+  const rng = mulberry32(hashStr(`${seedKey}|dailyCount`));
+  const span = schedule.maxDailyCap - schedule.minDailyCap;
+  return schedule.minDailyCap + Math.floor(rng() * (span + 1));
 }
 
 const LOW_AVAILABILITY_THRESHOLD = 3;
@@ -142,9 +163,11 @@ export function getDaySlots(
   }
 
   const schedule = DONATION_SCHEDULES[donationTypeId];
-  const timeSlots = buildTimeSlots(schedule);
+  const seedKey = `${center.id}|${dateStr}|${donationTypeId}`;
+  const dailyCount = resolveDailyCount(schedule, seedKey);
+  const timeSlots = buildTimeSlots(schedule, dailyCount);
 
-  const rng = mulberry32(hashStr(`${center.id}|${dateStr}|${donationTypeId}`));
+  const rng = mulberry32(hashStr(seedKey));
   const dayIndex = Math.floor(date.getTime() / 86_400_000);
   // Variamos la probabilidad de disponibilidad para mostrar una mezcla de
   // días llenos, con poca disponibilidad y con cupos normales.

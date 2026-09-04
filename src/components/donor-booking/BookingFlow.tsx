@@ -10,17 +10,15 @@ import { StepConfirmation } from "./StepConfirmation";
 import { AppointmentSummary } from "./AppointmentSummary";
 import { cancelActiveAppointment, saveAppointment, type Appointment } from "@/lib/donor-booking/appointments";
 import { useActiveAppointment } from "@/lib/donor-booking/useActiveAppointment";
-import type { Center, DonationTypeId, Locality } from "@/lib/donor-booking/types";
+import type { Center, DonationTypeId } from "@/lib/donor-booking/types";
 
 type BookingState = {
   donationTypeId: DonationTypeId | null;
-  locality: Locality | null;
   center: Center | null;
 };
 
 const INITIAL_STATE: BookingState = {
   donationTypeId: null,
-  locality: null,
   center: null,
 };
 
@@ -88,12 +86,12 @@ export function BookingFlow() {
 
           {stepIndex === 1 && (
             <StepCenter
-              onSelect={(locality, center) => setState((s) => ({ ...s, locality, center }))}
+              onSelect={(center) => setState((s) => ({ ...s, center }))}
               onBack={() => setState((s) => ({ ...s, donationTypeId: null }))}
             />
           )}
 
-          {stepIndex === 2 && state.center && state.donationTypeId && state.locality && (
+          {stepIndex === 2 && state.center && state.donationTypeId && (
             <StepSchedule
               center={state.center}
               donationTypeId={state.donationTypeId}
@@ -103,14 +101,13 @@ export function BookingFlow() {
                   centerId: state.center!.id,
                   centerName: state.center!.name,
                   centerAddress: state.center!.address,
-                  localityName: state.locality!.name,
                   dateStr: date.toISOString().slice(0, 10),
                   time,
                 };
                 saveAppointment(appointment);
                 setConfirmedAppointment(appointment);
               }}
-              onBack={() => setState((s) => ({ ...s, center: null, locality: null }))}
+              onBack={() => setState((s) => ({ ...s, center: null }))}
             />
           )}
         </div>

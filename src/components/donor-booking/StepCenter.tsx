@@ -1,103 +1,46 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { centers, localities } from "@/lib/donor-booking/data";
-import { findCentersForLocality } from "@/lib/donor-booking/availability";
-import type { Center, CenterResult, Locality } from "@/lib/donor-booking/types";
-
-function normalize(str: string): string {
-  return str
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-}
+import { useMemo } from "react";
+import { centers, INSTITUTION_CENTER_IDS, localities } from "@/lib/donor-booking/data";
+import { getInstitutionCenters } from "@/lib/donor-booking/availability";
+import { DONOR_LOCALITY_ID } from "@/lib/donor-profile/data";
+import type { CenterResult } from "@/lib/donor-booking/types";
 
 export function StepCenter({
   onSelect,
   onBack,
 }: {
-  onSelect: (locality: Locality, center: Center) => void;
+  onSelect: (center: CenterResult["center"]) => void;
   onBack: () => void;
 }) {
-  const [query, setQuery] = useState("");
-  const [selectedLocality, setSelectedLocality] = useState<Locality | null>(null);
+  const results = useMemo(() => {
+    const donorLocality = localities.find((l) => l.id === DONOR_LOCALITY_ID);
+    return getInstitutionCenters(centers, INSTITUTION_CENTER_IDS, donorLocality);
+  }, []);
 
-  const suggestions = useMemo(() => {
-    if (selectedLocality || query.trim().length === 0) return [];
-    const q = normalize(query);
-    return localities.filter((l) => normalize(l.name).includes(q)).slice(0, 6);
-  }, [query, selectedLocality]);
-
-  const lookup = useMemo(() => {
-    if (!selectedLocality) return null;
-    return findCentersForLocality(selectedLocality, centers);
-  }, [selectedLocality]);
+  const isSingleCenter = results.length === 1;
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-zinc-900">¿Dónde querés donar?</h2>
+      <h2 className="text-xl font-semibold text-zinc-900">
+        {isSingleCenter ? "Tu centro de donación" : "¿Dónde querés donar?"}
+      </h2>
       <p className="mt-1 text-sm text-zinc-500">
-        Buscá tu localidad y te mostramos los centros disponibles.
+        {isSingleCenter
+          ? "Este es el centro habilitado para tu institución."
+          : "Elegí el centro de tu institución más conveniente."}
       </p>
 
-      <div className="relative mt-6">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setSelectedLocality(null);
-          }}
-          placeholder="Buscar localidad (ej. Chascomús, Rosario...)"
-          className="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm text-zinc-900 outline-none focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20"
-        />
-        {suggestions.length > 0 && (
-          <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
-            {suggestions.map((l) => (
-              <li key={l.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedLocality(l);
-                    setQuery(l.name);
-                  }}
-                  className="flex w-full flex-col px-4 py-2.5 text-left text-sm hover:bg-zinc-50"
-                >
-                  <span className="font-medium text-zinc-900">{l.name}</span>
-                  <span className="text-xs text-zinc-500">{l.province}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="mt-6 flex flex-col gap-3">
+        {results.map((result) => (
+          <CenterCard
+            key={result.center.id}
+            result={result}
+            showDistance={!isSingleCenter}
+            onSelect={() => onSelect(result.center)}
+          />
+        ))}
       </div>
-
-      {lookup && (
-        <div className="mt-6">
-          {lookup.hasHomeCenter ? (
-            <p className="text-sm font-medium text-zinc-700">
-              Centros en {selectedLocality?.name}
-            </p>
-          ) : (
-            <p className="text-sm font-medium text-zinc-700">
-              No tenemos un centro propio en{" "}
-              <span className="text-zinc-900">{selectedLocality?.name}</span>, pero estos son
-              los más cercanos:
-            </p>
-          )}
-
-          <div className="mt-3 flex flex-col gap-3">
-            {lookup.results.map((result) => (
-              <CenterCard
-                key={result.center.id}
-                result={result}
-                localityName={selectedLocality!.name}
-                onSelect={() => onSelect(selectedLocality!, result.center)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       <button
         type="button"
@@ -112,11 +55,11 @@ export function StepCenter({
 
 function CenterCard({
   result,
-  localityName,
+  showDistance,
   onSelect,
 }: {
   result: CenterResult;
-  localityName: string;
+  showDistance: boolean;
   onSelect: () => void;
 }) {
   const { center, distanceKm, isHome } = result;
@@ -129,9 +72,9 @@ function CenterCard({
       <div>
         <p className="font-semibold text-zinc-900">{center.name}</p>
         <p className="text-sm text-zinc-500">{center.address}</p>
-        {!isHome && (
+        {showDistance && !isHome && (
           <p className="mt-1 text-xs font-medium text-brand-violet">
-            a {Math.max(1, Math.round(distanceKm))} km de {localityName}
+            a {Math.max(1, Math.round(distanceKm))} km de tu localidad
           </p>
         )}
       </div>

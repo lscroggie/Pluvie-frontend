@@ -42,6 +42,13 @@ export const localities: Locality[] = [
   { id: "santa-fe", name: "Santa Fe", province: "Santa Fe", lat: -31.6333, lng: -60.7 },
 ];
 
+// Pluvie se vende institución por institución: cada donante ve únicamente
+// los centros de LA institución con la que está vinculado, no un buscador
+// nacional. Mock: el donante de esta app pertenece al hospital piloto, que
+// hoy tiene un solo centro. Cuando la institución sume sedes, alcanza con
+// agregar su id acá.
+export const INSTITUTION_CENTER_IDS = ["centro-caba"];
+
 export const centers: Center[] = [
   {
     id: "centro-caba",

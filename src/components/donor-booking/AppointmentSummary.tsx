@@ -27,7 +27,6 @@ export function AppointmentSummary({
     <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 p-5">
       <SummaryRow label="Tipo de donación" value={donationType?.name ?? appointment.donationTypeId} />
       <SummaryRow label="Centro" value={appointment.centerName} sub={appointment.centerAddress} />
-      <SummaryRow label="Localidad buscada" value={appointment.localityName} />
       <SummaryRow label="Fecha" value={formatDate(appointment.dateStr)} />
       <SummaryRow label="Horario" value={appointment.time} />
 
