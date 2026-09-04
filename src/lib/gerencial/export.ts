@@ -55,6 +55,12 @@ export function exportToExcel(viewModel: DashboardViewModel, institutionName: st
     ["Ausentismo", viewModel.attendance.absenteeismCount, attendancePct(viewModel.attendance.absenteeismCount, viewModel.attendance.grantedAppointments)],
     ["Asistió pero no pudo donar", viewModel.attendance.notEligibleCount, attendancePct(viewModel.attendance.notEligibleCount, viewModel.attendance.grantedAppointments)],
     ["Donación efectiva", viewModel.attendance.effectiveDonations, attendancePct(viewModel.attendance.effectiveDonations, viewModel.attendance.grantedAppointments)],
+    [],
+    ["Cancelados por el donante antes de la fecha (evento separado, no cuenta como ausentismo)"],
+    [
+      "Cantidad",
+      viewModel.donorCancellations.hasRealData ? viewModel.donorCancellations.count : "Sin datos reales todavía",
+    ],
   ];
 
   const sheet = utils.aoa_to_sheet(rows);
@@ -122,6 +128,21 @@ export function exportToPdf(viewModel: DashboardViewModel, institutionName: stri
         "Donación efectiva",
         String(viewModel.attendance.effectiveDonations),
         attendancePct(viewModel.attendance.effectiveDonations, viewModel.attendance.grantedAppointments),
+      ],
+    ],
+  });
+
+  const afterAttendance = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+
+  autoTable(doc, {
+    startY: afterAttendance + 10,
+    head: [["Cancelados por el donante antes de la fecha (no cuenta como ausentismo)", "Cantidad"]],
+    body: [
+      [
+        "",
+        viewModel.donorCancellations.hasRealData
+          ? String(viewModel.donorCancellations.count)
+          : "Sin datos reales todavía",
       ],
     ],
   });

@@ -1,5 +1,5 @@
 import { KpiCard } from "./KpiCard";
-import type { AttendanceBreakdown, NotEligibleReason } from "@/lib/gerencial/types";
+import type { AttendanceBreakdown, DonorCancellations, NotEligibleReason } from "@/lib/gerencial/types";
 
 function pct(count: number, total: number): string {
   return total === 0 ? "0%" : `${Math.round((count / total) * 100)}%`;
@@ -7,9 +7,11 @@ function pct(count: number, total: number): string {
 
 export function AttendanceSection({
   data,
+  donorCancellations,
   notEligibleReasons,
 }: {
   data: AttendanceBreakdown;
+  donorCancellations: DonorCancellations;
   notEligibleReasons: NotEligibleReason[];
 }) {
   const total = data.grantedAppointments;
@@ -41,6 +43,13 @@ export function AttendanceSection({
           accent="green"
         />
       </div>
+
+      <p className="mt-3 text-xs text-zinc-500">
+        Cancelados por el donante antes de la fecha (no cuenta como ausentismo):{" "}
+        <span className="font-semibold text-zinc-700">
+          {donorCancellations.hasRealData ? donorCancellations.count : "Sin datos reales todavía"}
+        </span>
+      </p>
 
       {data.notEligibleCount > 0 && notEligibleReasons.length > 0 && (
         <div className="mt-3 rounded-xl border border-zinc-200 bg-white p-3.5">

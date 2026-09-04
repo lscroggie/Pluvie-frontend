@@ -22,6 +22,17 @@ describe("consistencia matemática de los datos mock gerenciales", () => {
     }
   });
 
+  it("las cancelaciones del donante son un evento separado: nunca se suman a otorgados", () => {
+    // scheduledAppointments (= otorgados) debe seguir cuadrando exactamente
+    // con ausentismo + no elegible + donación efectiva, sin importar
+    // cancelledByDonorCount: es un evento aparte, no un 4to sumando.
+    for (const month of monthlyData) {
+      expect(month.absenteeismCount + month.notEligibleCount + month.donationsCount).toBe(month.scheduledAppointments);
+    }
+    expect(yearVM.donorCancellations.count).toBe(monthVMs.reduce((s, vm) => s + vm.donorCancellations.count, 0));
+    expect(historicVM.donorCancellations.count).toBe(monthVMs.reduce((s, vm) => s + vm.donorCancellations.count, 0));
+  });
+
   it("vista Año = suma de los meses de ese año", () => {
     expect(yearVM.kpis.donationsThisMonth.value).toBe(monthVMs.reduce((s, vm) => s + vm.kpis.donationsThisMonth.value, 0));
     expect(yearVM.kpis.peopleHelped.value).toBe(monthVMs.reduce((s, vm) => s + vm.kpis.peopleHelped.value, 0));

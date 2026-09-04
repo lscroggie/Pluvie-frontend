@@ -98,7 +98,11 @@ export function GerencialDashboard() {
 
       {/* Asistencia / motivos */}
       <section id="attendance-section" className="mt-4">
-        <AttendanceSection data={viewModel.attendance} notEligibleReasons={viewModel.notEligibleReasons} />
+        <AttendanceSection
+          data={viewModel.attendance}
+          donorCancellations={viewModel.donorCancellations}
+          notEligibleReasons={viewModel.notEligibleReasons}
+        />
       </section>
 
       {/* Nuevos vs. recurrentes + alertas */}

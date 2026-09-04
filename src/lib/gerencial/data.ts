@@ -10,6 +10,7 @@ import type {
   ChartPoint,
   DashboardViewModel,
   DonationTypeBreakdownItem,
+  DonorCancellations,
   DonorLevelBreakdownItem,
   DonorLevelId,
   DonorSegmentation,
@@ -181,6 +182,9 @@ function buildMonth(
     scheduledAppointments,
     absenteeismCount,
     notEligibleCount,
+    // Mock en 0: no existe hoy un registro real de cancelaciones del donante
+    // antes de la fecha. Ver DonorCancellations en types.ts.
+    cancelledByDonorCount: 0,
     weeklyDonations: splitIntoWeeks(donationsCount),
     donationTypeCounts: splitByDonationType(donationsCount),
     ...splitNewVsRecurringDonors(donationsCount),
@@ -461,6 +465,13 @@ function toAttendance(scheduled: number, absenteeismCount: number, notEligibleCo
   };
 }
 
+function toDonorCancellations(months: MonthlyGerencialData[]): DonorCancellations {
+  return {
+    count: months.reduce((sum, month) => sum + month.cancelledByDonorCount, 0),
+    hasRealData: false, // mock: no hay registro real de cancelaciones todavía
+  };
+}
+
 function sumDonorSegmentation(months: MonthlyGerencialData[]): DonorSegmentation {
   return {
     newDonors: months.reduce((sum, month) => sum + month.newDonorsCount, 0),
@@ -496,6 +507,7 @@ function aggregateMonths(months: MonthlyGerencialData[]) {
     peopleHelpedBreakdown: computePeopleHelpedBreakdown(donationTypeBreakdown),
     donationTypeBreakdown,
     attendance: toAttendance(scheduledTotal, absenteeismTotal, notEligibleTotal, donationsTotal),
+    donorCancellations: toDonorCancellations(months),
     notEligibleReasons: splitNotEligibleReasons(notEligibleTotal),
     donorSegmentation,
     newDonorDetail: computeNewDonorDetail(donorSegmentation.newDonors),
@@ -539,6 +551,7 @@ export function getDashboardViewModel(period: Period): DashboardViewModel {
       peopleHelpedBreakdown: computePeopleHelpedBreakdown(toBreakdown(month.donationTypeCounts)),
       donationTypeBreakdown: toBreakdown(month.donationTypeCounts),
       attendance: toAttendance(month.scheduledAppointments, month.absenteeismCount, month.notEligibleCount, month.donationsCount),
+      donorCancellations: toDonorCancellations([month]),
       notEligibleReasons: splitNotEligibleReasons(month.notEligibleCount),
       donorSegmentation: { newDonors: month.newDonorsCount, recurringDonors: month.recurringDonorsCount },
       newDonorDetail: computeNewDonorDetail(month.newDonorsCount),

@@ -31,6 +31,15 @@ export type NotEligibleReason = {
   count: number;
 };
 
+// Turnos cancelados por el donante ANTES de la fecha (fuerza mayor, cambio
+// de planes). Evento separado de "turno otorgado": el cupo se liberó a
+// tiempo, así que NO entra en el invariante otorgados = ausentismo + no
+// elegible + donación efectiva, ni cuenta como ausentismo.
+export type DonorCancellations = {
+  count: number;
+  hasRealData: boolean; // false hasta que exista un registro real de cancelaciones
+};
+
 export type MonthlyGerencialData = {
   monthKey: string; // "2026-08"
   monthLabel: string; // "Agosto 2026"
@@ -38,6 +47,10 @@ export type MonthlyGerencialData = {
   scheduledAppointments: number;
   absenteeismCount: number;
   notEligibleCount: number;
+  // Mock en 0: no existe hoy un registro real de cancelaciones del donante
+  // (el flujo /turno recién empezó a permitir cancelar). Evento separado del
+  // invariante de otorgados — ver DonorCancellations.
+  cancelledByDonorCount: number;
   // PENDIENTE (integración con backend real): weeklyDonations asume siempre
   // un mes ya cerrado, repartiendo donationsCount entre 4 semanas con pesos
   // fijos (ver splitIntoWeeks en data.ts). Si el mes actual llega del backend
@@ -183,6 +196,7 @@ export type DashboardViewModel = {
   };
   donationTypeBreakdown: DonationTypeBreakdownItem[];
   attendance: AttendanceBreakdown;
+  donorCancellations: DonorCancellations;
   notEligibleReasons: NotEligibleReason[];
   donorSegmentation: DonorSegmentation;
   newDonorDetail: NewDonorDetail;
