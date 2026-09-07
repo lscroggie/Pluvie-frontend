@@ -115,7 +115,7 @@ export function StepSchedule({
               disabled={!slot.available}
               onClick={() => setSelectedTime(slot.time)}
               className={[
-                "rounded-xl border px-3 py-2 text-sm font-medium transition-colors",
+                "flex flex-col items-center rounded-xl border px-3 py-2 text-sm font-medium transition-colors",
                 !slot.available
                   ? "border-zinc-100 bg-zinc-50 text-zinc-300 line-through cursor-not-allowed"
                   : selectedTime === slot.time
@@ -124,6 +124,16 @@ export function StepSchedule({
               ].join(" ")}
             >
               {slot.time}
+              {slot.capacity > 1 && (
+                <span
+                  className={[
+                    "text-[10px] font-normal normal-case no-underline",
+                    selectedTime === slot.time && slot.available ? "text-white/80" : "text-zinc-400",
+                  ].join(" ")}
+                >
+                  {slot.available ? `${slot.freeSpots} lugares` : "sin lugares"}
+                </span>
+              )}
             </button>
           ))}
         </div>

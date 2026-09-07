@@ -34,8 +34,11 @@ export function AppointmentSummary({
         <button
           type="button"
           onClick={onCancel}
-          className="mt-2 self-start text-sm font-medium text-red-600 hover:text-red-700"
+          className="mt-2 flex items-center gap-1.5 self-start rounded-full border border-brand-violet px-4 py-2 text-sm font-semibold text-brand-violet transition-colors hover:bg-brand-violet hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
         >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
+          </svg>
           Cancelar turno
         </button>
       )}

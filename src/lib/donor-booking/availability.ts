@@ -76,25 +76,28 @@ function mulberry32(seed: number) {
 }
 
 // Configuración real de franjas del hospital piloto, por tipo de donación.
-// Plasma no tiene rango horario confirmado todavía: se deja con el mismo
-// criterio de plaquetas (ventana acotada, cupo diario bajo) como valor
-// provisorio.
-// TODO: confirmar con el hospital piloto el rango horario exacto de plasma.
+// Plaquetas y plasma (aféresis) usan 2 bloques horarios fijos por día, con
+// cupo propio para varios donantes en simultáneo cada uno.
 export const DONATION_SCHEDULES: Record<DonationTypeId, DonationSchedule> = {
-  "sangre-entera": { startMinutes: 8 * 60, endMinutes: 13 * 60 + 30, slotEveryMinutes: 5 },
-  plaquetas: {
+  "sangre-entera": {
+    kind: "continuous",
     startMinutes: 8 * 60,
-    endMinutes: 11 * 60,
+    endMinutes: 13 * 60 + 30,
     slotEveryMinutes: 5,
-    minDailyCap: 2,
-    maxDailyCap: 4,
+  },
+  plaquetas: {
+    kind: "fixed",
+    blocks: [
+      { time: "08:00", capacity: 3 },
+      { time: "11:00", capacity: 3 },
+    ],
   },
   plasma: {
-    startMinutes: 8 * 60,
-    endMinutes: 11 * 60,
-    slotEveryMinutes: 5,
-    minDailyCap: 2,
-    maxDailyCap: 4,
+    kind: "fixed",
+    blocks: [
+      { time: "08:00", capacity: 3 },
+      { time: "11:00", capacity: 3 },
+    ],
   },
 };
 
@@ -104,42 +107,18 @@ function minutesToTime(minutes: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-/**
- * Franjas horarias del día para un tipo de donación. Sangre entera admite
- * una franja cada 5 minutos en toda la ventana (hasta 1 turno por franja).
- * Plaquetas y plasma tienen un tope diario bajo (aféresis): el total de
- * franjas de ESE día (`dailyCount`) varía entre `minDailyCap` y
- * `maxDailyCap` y se distribuye a lo largo de la ventana — también 1 turno
- * por franja.
- */
-function buildTimeSlots(schedule: DonationSchedule, dailyCount?: number): string[] {
-  const { startMinutes, endMinutes, slotEveryMinutes } = schedule;
-
-  if (!dailyCount) {
-    const times: string[] = [];
-    for (let m = startMinutes; m <= endMinutes; m += slotEveryMinutes) {
-      times.push(minutesToTime(m));
-    }
-    return times;
+/** Franjas horarias del día para un tipo de donación, con su cupo total. */
+function buildTimeSlots(schedule: DonationSchedule): { time: string; capacity: number }[] {
+  if (schedule.kind === "fixed") {
+    return schedule.blocks;
   }
 
-  const span = endMinutes - startMinutes;
-  const step = dailyCount > 1 ? span / (dailyCount - 1) : 0;
-  const times: string[] = [];
-  for (let i = 0; i < dailyCount; i++) {
-    const raw = startMinutes + i * step;
-    const rounded = Math.round(raw / slotEveryMinutes) * slotEveryMinutes;
-    times.push(minutesToTime(rounded));
+  const { startMinutes, endMinutes, slotEveryMinutes } = schedule;
+  const times: { time: string; capacity: number }[] = [];
+  for (let m = startMinutes; m <= endMinutes; m += slotEveryMinutes) {
+    times.push({ time: minutesToTime(m), capacity: 1 });
   }
   return times;
-}
-
-/** Cuántos turnos totales tiene ESE día, para tipos con tope diario variable. */
-function resolveDailyCount(schedule: DonationSchedule, seedKey: string): number | undefined {
-  if (!schedule.minDailyCap || !schedule.maxDailyCap) return undefined;
-  const rng = mulberry32(hashStr(`${seedKey}|dailyCount`));
-  const span = schedule.maxDailyCap - schedule.minDailyCap;
-  return schedule.minDailyCap + Math.floor(rng() * (span + 1));
 }
 
 const LOW_AVAILABILITY_THRESHOLD = 3;
@@ -164,8 +143,7 @@ export function getDaySlots(
 
   const schedule = DONATION_SCHEDULES[donationTypeId];
   const seedKey = `${center.id}|${dateStr}|${donationTypeId}`;
-  const dailyCount = resolveDailyCount(schedule, seedKey);
-  const timeSlots = buildTimeSlots(schedule, dailyCount);
+  const timeSlots = buildTimeSlots(schedule);
 
   const rng = mulberry32(hashStr(seedKey));
   const dayIndex = Math.floor(date.getTime() / 86_400_000);
@@ -182,12 +160,19 @@ export function getDaySlots(
       ? activeAppointment.time
       : null;
 
-  const times = timeSlots.map((time) => ({
-    time,
-    available: time !== takenByActiveAppointment && rng() < availableProbability,
-  }));
-  const freeCount = times.filter((t) => t.available).length;
-  const totalCount = times.length;
+  const times = timeSlots.map(({ time, capacity }) => {
+    // Cada lugar del bloque se ocupa de forma independiente según la
+    // probabilidad de disponibilidad del día.
+    let freeSpots = 0;
+    for (let i = 0; i < capacity; i++) {
+      if (rng() < availableProbability) freeSpots += 1;
+    }
+    if (time === takenByActiveAppointment) freeSpots = 0;
+
+    return { time, capacity, freeSpots, available: freeSpots > 0 };
+  });
+  const freeCount = times.reduce((sum, t) => sum + t.freeSpots, 0);
+  const totalCount = times.reduce((sum, t) => sum + t.capacity, 0);
 
   let status: DaySlotStatus = "open";
   if (freeCount === 0) status = "full";

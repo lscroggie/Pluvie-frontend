@@ -8,9 +8,18 @@ import { StepCenter } from "./StepCenter";
 import { StepSchedule } from "./StepSchedule";
 import { StepConfirmation } from "./StepConfirmation";
 import { AppointmentSummary } from "./AppointmentSummary";
+import { BackButton } from "./BackButton";
 import { cancelActiveAppointment, saveAppointment, type Appointment } from "@/lib/donor-booking/appointments";
 import { useActiveAppointment } from "@/lib/donor-booking/useActiveAppointment";
 import type { Center, DonationTypeId } from "@/lib/donor-booking/types";
+import { donations } from "@/lib/donor-profile/data";
+import { getCrossTypeRestriction } from "@/lib/donor-profile/eligibility";
+
+const DATE_LABEL = new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "long" });
+
+function formatDate(iso: string): string {
+  return DATE_LABEL.format(new Date(`${iso}T00:00:00`));
+}
 
 type BookingState = {
   donationTypeId: DonationTypeId | null;
@@ -25,9 +34,51 @@ const INITIAL_STATE: BookingState = {
 export function BookingFlow() {
   const [state, setState] = useState<BookingState>(INITIAL_STATE);
   const [confirmedAppointment, setConfirmedAppointment] = useState<Appointment | null>(null);
+  const [blockedType, setBlockedType] = useState<{
+    typeId: DonationTypeId;
+    lastWholeBloodDate: string;
+    eligibleDate: string;
+  } | null>(null);
   const existingAppointment = useActiveAppointment();
 
   const stepIndex = state.center ? 2 : state.donationTypeId ? 1 : 0;
+
+  function handleSelectDonationType(donationTypeId: DonationTypeId) {
+    const restriction = getCrossTypeRestriction(donations, donationTypeId, new Date());
+    if (restriction) {
+      setBlockedType({
+        typeId: donationTypeId,
+        lastWholeBloodDate: restriction.lastWholeBloodDate,
+        eligibleDate: restriction.eligibleDate,
+      });
+      return;
+    }
+    setState((s) => ({ ...s, donationTypeId }));
+  }
+
+  if (blockedType) {
+    return (
+      <div className="w-full">
+        <BookingHeader />
+        <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:py-16">
+          <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900">
+              Todavía no podés reservar {blockedType.typeId === "plaquetas" ? "plaquetas" : "plasma"}
+            </h2>
+            <p className="mt-2 text-sm text-zinc-500">
+              Donaste sangre entera el {formatDate(blockedType.lastWholeBloodDate)}. Para donar
+              plaquetas o plasma, necesitás esperar hasta el{" "}
+              <span className="font-medium text-zinc-700">{formatDate(blockedType.eligibleDate)}</span>.
+            </p>
+
+            <div className="mt-6">
+              <BackButton onClick={() => setBlockedType(null)} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (confirmedAppointment) {
     return (
@@ -78,11 +129,7 @@ export function BookingFlow() {
         </div>
 
         <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-          {stepIndex === 0 && (
-            <StepDonationType
-              onSelect={(donationTypeId) => setState((s) => ({ ...s, donationTypeId }))}
-            />
-          )}
+          {stepIndex === 0 && <StepDonationType onSelect={handleSelectDonationType} />}
 
           {stepIndex === 1 && (
             <StepCenter

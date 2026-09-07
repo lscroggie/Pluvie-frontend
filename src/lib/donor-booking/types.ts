@@ -36,6 +36,8 @@ export type DaySlotStatus = "closed" | "full" | "low" | "open";
 export type TimeSlot = {
   time: string;
   available: boolean;
+  capacity: number;
+  freeSpots: number;
 };
 
 export type DaySlots = {
@@ -48,12 +50,18 @@ export type DaySlots = {
 };
 
 // Franjas horarias reales del hospital piloto, por tipo de donación.
-export type DonationSchedule = {
-  startMinutes: number; // minutos desde 00:00
-  endMinutes: number;
-  slotEveryMinutes: number; // separación entre franjas dentro de la ventana
-  // Tope de turnos/día en total (aféresis): varía día a día entre estos
-  // valores. Sin tope (sangre entera) = 1 franja cada `slotEveryMinutes`.
-  minDailyCap?: number;
-  maxDailyCap?: number;
-};
+// "continuous": una franja cada `slotEveryMinutes` a lo largo de la ventana,
+// 1 turno por franja (sangre entera).
+// "fixed": bloques horarios fijos, cada uno con cupo propio para varios
+// donantes en simultáneo (plaquetas/plasma, por aféresis).
+export type DonationSchedule =
+  | {
+      kind: "continuous";
+      startMinutes: number; // minutos desde 00:00
+      endMinutes: number;
+      slotEveryMinutes: number; // separación entre franjas dentro de la ventana
+    }
+  | {
+      kind: "fixed";
+      blocks: { time: string; capacity: number }[];
+    };

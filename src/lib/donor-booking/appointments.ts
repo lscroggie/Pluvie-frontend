@@ -63,8 +63,33 @@ export function saveAppointment(appointment: Appointment): void {
   notifyListeners();
 }
 
-export function cancelActiveAppointment(): void {
+// Turnos cancelados por el donante ANTES de la fecha (fuerza mayor, cambio
+// de planes): evento separado de "ausentismo" para las métricas de
+// /gerencial (ver DonorCancellations en lib/gerencial/types.ts). El cupo se
+// liberó a tiempo, así que no debe computar como no-show.
+const CANCELLATIONS_KEY = "pluvie:donor-cancellations-early";
+
+export type DonorCancellationEvent = {
+  appointment: Appointment;
+  cancelledAt: string; // ISO timestamp
+  reason: "cancelled_early_by_donor";
+};
+
+function recordDonorCancellation(appointment: Appointment): void {
+  try {
+    const raw = window.localStorage.getItem(CANCELLATIONS_KEY);
+    const events: DonorCancellationEvent[] = raw ? JSON.parse(raw) : [];
+    events.push({ appointment, cancelledAt: new Date().toISOString(), reason: "cancelled_early_by_donor" });
+    window.localStorage.setItem(CANCELLATIONS_KEY, JSON.stringify(events));
+  } catch {
+    // Registro best-effort: no debe impedir que la cancelación se complete.
+  }
+}
+
+export function cancelActiveAppointment(appointment?: Appointment | null): void {
   if (!isBrowser()) return;
+  const cancelled = appointment ?? getActiveAppointment();
+  if (cancelled) recordDonorCancellation(cancelled);
   window.localStorage.removeItem(STORAGE_KEY);
   notifyListeners();
 }

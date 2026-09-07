@@ -21,6 +21,7 @@ export function NextDonationEligibility({
   return (
     <div>
       <h2 className="text-lg font-semibold text-zinc-900">Tu próxima donación</h2>
+      <p className="mt-1 text-sm text-zinc-500">Así está tu calendario de donación:</p>
       <div className="mt-3 flex flex-col gap-2">
         {rows.map((row) => (
           <div
@@ -29,20 +30,22 @@ export function NextDonationEligibility({
               "rounded-2xl border p-4 text-sm",
               row.isEligibleNow
                 ? "border-brand-green/30 bg-brand-green/5 text-zinc-900"
-                : "border-zinc-200 bg-zinc-50 text-zinc-600",
+                : "border-brand-violet/20 bg-brand-violet/5 text-zinc-700",
             ].join(" ")}
           >
             {row.isEligibleNow ? (
-              <p>
-                <span className="font-semibold text-brand-green">
-                  ¡Ya podés donar {row.typeName.toLowerCase()} de nuevo!
-                </span>
+              <p className="font-semibold text-brand-green">
+                ¡Ya podés donar {row.typeName.toLowerCase()} de nuevo!
               </p>
             ) : (
               <p>
-                Donaste <span className="font-medium text-zinc-900">{row.typeName.toLowerCase()}</span>{" "}
-                el {formatDate(row.lastDate)}. Podés volver a donar {row.typeName.toLowerCase()} a
-                partir del <span className="font-medium text-zinc-900">{formatDate(row.nextEligibleDate)}</span>.
+                Podés volver a donar{" "}
+                <span className="font-medium text-zinc-900">{row.typeName.toLowerCase()}</span> a
+                partir del{" "}
+                <span className="font-semibold text-brand-violet">
+                  {formatDate(row.nextEligibleDate)}
+                </span>
+                .
               </p>
             )}
           </div>
