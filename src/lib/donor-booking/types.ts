@@ -31,7 +31,7 @@ export type CenterResult = {
   isHome: boolean;
 };
 
-export type DaySlotStatus = "closed" | "full" | "low" | "open";
+export type DaySlotStatus = "closed" | "full" | "low" | "open" | "ineligible";
 
 export type TimeSlot = {
   time: string;

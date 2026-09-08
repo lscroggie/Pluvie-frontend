@@ -3,15 +3,27 @@
 import { useMemo, useState } from "react";
 import { getActiveAppointment } from "@/lib/donor-booking/appointments";
 import { getDaySlots, getUpcomingDays } from "@/lib/donor-booking/availability";
+import { donationTypes } from "@/lib/donor-booking/data";
 import type { Center, DaySlots, DonationTypeId } from "@/lib/donor-booking/types";
+import { donations } from "@/lib/donor-profile/data";
+import {
+  CROSS_TYPE_WAIT_DAYS_WHOLE_BLOOD_TO_APHERESIS,
+  getBookingRestriction,
+} from "@/lib/donor-profile/eligibility";
 import { BackButton } from "./BackButton";
 
 const DAY_LABEL = new Intl.DateTimeFormat("es-AR", { weekday: "short" });
 const MONTH_LABEL = new Intl.DateTimeFormat("es-AR", { month: "short" });
+const FULL_DATE_LABEL = new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "long" });
+
+function formatFullDate(dateStr: string): string {
+  return FULL_DATE_LABEL.format(new Date(`${dateStr}T00:00:00`));
+}
 
 function statusLabel(day: DaySlots): string {
   if (day.status === "closed") return "Cerrado";
   if (day.status === "full") return "Completo";
+  if (day.status === "ineligible") return "No disponible";
   return `${day.freeCount} libres`;
 }
 
@@ -26,33 +38,64 @@ export function StepSchedule({
   onSelect: (date: Date, time: string) => void;
   onBack: () => void;
 }) {
+  const restriction = useMemo(
+    () => getBookingRestriction(donations, donationTypeId, new Date()),
+    [donationTypeId],
+  );
+  const minEligibleDateStr = restriction?.eligibleDate ?? null;
+
   const days = useMemo(() => {
     const activeAppointment = getActiveAppointment();
-    return getUpcomingDays(14).map((date) =>
-      getDaySlots(center, date, donationTypeId, activeAppointment),
-    );
-  }, [center, donationTypeId]);
+    return getUpcomingDays(14).map((date) => {
+      const day = getDaySlots(center, date, donationTypeId, activeAppointment);
+      if (minEligibleDateStr && day.dateStr < minEligibleDateStr) {
+        return { ...day, status: "ineligible" as const };
+      }
+      return day;
+    });
+  }, [center, donationTypeId, minEligibleDateStr]);
 
-  const firstOpenIndex = days.findIndex((d) => d.status !== "closed" && d.status !== "full");
+  const firstOpenIndex = days.findIndex(
+    (d) => d.status !== "closed" && d.status !== "full" && d.status !== "ineligible",
+  );
   const [selectedDayIndex, setSelectedDayIndex] = useState(Math.max(0, firstOpenIndex));
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const selectedDay = days[selectedDayIndex];
+  const allDaysIneligible = minEligibleDateStr !== null && days.every((d) => d.status === "ineligible");
+
+  const typeName = donationTypes.find((t) => t.id === donationTypeId)!.name;
+  const ineligibilityReason =
+    restriction?.reason === "cross-type"
+      ? `No disponible: donaste sangre entera hace menos de ${CROSS_TYPE_WAIT_DAYS_WHOLE_BLOOD_TO_APHERESIS} días.`
+      : `No disponible: todavía no cumplís el plazo mínimo desde tu última donación de ${typeName.toLowerCase()}.`;
 
   return (
     <div>
       <h2 className="text-xl font-semibold text-zinc-900">Elegí día y horario</h2>
       <p className="mt-1 text-sm text-zinc-500">{center.name}</p>
 
+      {allDaysIneligible && restriction && (
+        <div className="mt-4 flex gap-3 rounded-2xl bg-brand-amber/10 p-4">
+          <span className="mt-0.5 shrink-0 text-brand-amber">●</span>
+          <p className="text-sm text-zinc-700">
+            Vas a poder reservar {typeName.toLowerCase()} a partir del{" "}
+            <span className="font-semibold">{formatFullDate(restriction.eligibleDate)}</span>. Todavía
+            no te mostramos horarios porque caen antes de esa fecha.
+          </p>
+        </div>
+      )}
+
       <div className="mt-6 -mx-1 flex snap-x gap-2 overflow-x-auto pb-2 px-1">
         {days.map((day, i) => {
-          const disabled = day.status === "closed" || day.status === "full";
+          const disabled = day.status === "closed" || day.status === "full" || day.status === "ineligible";
           const isSelected = i === selectedDayIndex;
           return (
             <button
               key={day.dateStr}
               type="button"
               disabled={disabled}
+              title={day.status === "ineligible" ? ineligibilityReason : undefined}
               onClick={() => {
                 setSelectedDayIndex(i);
                 setSelectedTime(null);
@@ -107,6 +150,9 @@ export function StepSchedule({
 
       <div className="mt-6">
         <p className="text-sm font-medium text-zinc-700">Horarios disponibles</p>
+        {selectedDay.status === "ineligible" ? (
+          <p className="mt-3 text-sm text-zinc-400">{ineligibilityReason}</p>
+        ) : (
         <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
           {selectedDay.times.map((slot) => (
             <button
@@ -137,13 +183,14 @@ export function StepSchedule({
             </button>
           ))}
         </div>
+        )}
       </div>
 
       <div className="mt-8 flex items-center justify-between">
         <BackButton onClick={onBack} />
         <button
           type="button"
-          disabled={!selectedTime}
+          disabled={!selectedTime || selectedDay.status === "ineligible"}
           onClick={() => selectedTime && onSelect(selectedDay.date, selectedTime)}
           className="rounded-full bg-brand-violet px-6 py-2.5 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
         >
