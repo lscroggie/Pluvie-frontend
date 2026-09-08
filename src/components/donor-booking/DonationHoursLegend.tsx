@@ -1,7 +1,7 @@
 const ROWS = [
-  { label: "Sangre entera", hours: "8:00 a 13:30 hs" },
-  { label: "Plaquetas (aféresis)", hours: "8:00 y 11:00 hs · 3 cupos por bloque" },
-  { label: "Plasma (aféresis)", hours: "8:00 y 11:00 hs · 3 cupos por bloque" },
+  { label: "Sangre", hours: "8:00 a 13:30 hs" },
+  { label: "Plaquetas", hours: "8:00 y 11:00 hs · 3 cupos por bloque" },
+  { label: "Plasma", hours: "8:00 y 11:00 hs · 3 cupos por bloque" },
 ];
 
 export function DonationHoursLegend() {

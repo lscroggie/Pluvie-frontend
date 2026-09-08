@@ -1,5 +1,5 @@
 import type { DonationTypeId } from "@/lib/donor-booking/types";
-import type { Donation } from "./types";
+import type { Donation, DonorEditablePersonalData } from "./types";
 
 // Datos mock del historial de un donante. En producción vendrían del
 // registro de donaciones del donante en el backend.
@@ -15,6 +15,20 @@ export const DONOR_BLOOD_TYPE = "O+";
 // centros de SU institución cuando tiene más de uno. En producción vendría
 // del perfil autenticado (no de geolocalización del dispositivo).
 export const DONOR_LOCALITY_ID = "caba";
+
+// DNI mock del donante. En producción vendría del perfil autenticado; no es
+// editable desde "Mis Datos" porque hace a su identidad.
+export const DONOR_DNI = "34.567.890";
+
+// Valores iniciales mock de los datos personales editables del donante. En
+// producción vendrían del perfil autenticado.
+export const INITIAL_PERSONAL_DATA: DonorEditablePersonalData = {
+  phone: "11 2345-6789",
+  email: "julieta.gomez@example.com",
+  address: "Av. Corrientes 1234, CABA",
+  emergencyContactName: "Marcos Gómez",
+  emergencyContactPhone: "11 9876-5432",
+};
 
 export const donations: Donation[] = [
   // Año anterior (2025)

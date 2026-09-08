@@ -20,7 +20,7 @@ export function NextDonationEligibility({
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-zinc-900">Tu próxima donación</h2>
+      <h2 className="text-lg font-semibold text-zinc-900">Cuándo podés donar de nuevo</h2>
       <p className="mt-1 text-sm text-zinc-500">Así está tu calendario de donación:</p>
       <div className="mt-3 flex flex-col gap-2">
         {rows.map((row) => (

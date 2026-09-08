@@ -8,12 +8,13 @@ import { StepCenter } from "./StepCenter";
 import { StepSchedule } from "./StepSchedule";
 import { StepConfirmation } from "./StepConfirmation";
 import { AppointmentSummary } from "./AppointmentSummary";
-import { BackButton } from "./BackButton";
 import { cancelActiveAppointment, saveAppointment, type Appointment } from "@/lib/donor-booking/appointments";
 import { useActiveAppointment } from "@/lib/donor-booking/useActiveAppointment";
+import { donationTypes } from "@/lib/donor-booking/data";
 import type { Center, DonationTypeId } from "@/lib/donor-booking/types";
 import { donations } from "@/lib/donor-profile/data";
-import { getCrossTypeRestriction } from "@/lib/donor-profile/eligibility";
+import { getBookingRestriction } from "@/lib/donor-profile/eligibility";
+import { ToastStack, useToasts } from "@/components/ui/Toast";
 
 const DATE_LABEL = new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "long" });
 
@@ -36,19 +37,22 @@ export function BookingFlow() {
   const [confirmedAppointment, setConfirmedAppointment] = useState<Appointment | null>(null);
   const [blockedType, setBlockedType] = useState<{
     typeId: DonationTypeId;
-    lastWholeBloodDate: string;
+    reason: "cross-type" | "same-type";
+    lastDonationDate: string;
     eligibleDate: string;
   } | null>(null);
   const existingAppointment = useActiveAppointment();
+  const { toasts, showToast, dismissToast } = useToasts();
 
   const stepIndex = state.center ? 2 : state.donationTypeId ? 1 : 0;
 
   function handleSelectDonationType(donationTypeId: DonationTypeId) {
-    const restriction = getCrossTypeRestriction(donations, donationTypeId, new Date());
+    const restriction = getBookingRestriction(donations, donationTypeId, new Date());
     if (restriction) {
       setBlockedType({
         typeId: donationTypeId,
-        lastWholeBloodDate: restriction.lastWholeBloodDate,
+        reason: restriction.reason,
+        lastDonationDate: restriction.lastDonationDate,
         eligibleDate: restriction.eligibleDate,
       });
       return;
@@ -57,23 +61,26 @@ export function BookingFlow() {
   }
 
   if (blockedType) {
+    const typeName = donationTypes.find((t) => t.id === blockedType.typeId)!.name;
     return (
       <div className="w-full">
-        <BookingHeader />
+        <BookingHeader onBack={() => setBlockedType(null)} />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:py-16">
           <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-            <h2 className="text-xl font-semibold text-zinc-900">
-              Todavía no podés reservar {blockedType.typeId === "plaquetas" ? "plaquetas" : "plasma"}
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500">
-              Donaste sangre entera el {formatDate(blockedType.lastWholeBloodDate)}. Para donar
-              plaquetas o plasma, necesitás esperar hasta el{" "}
-              <span className="font-medium text-zinc-700">{formatDate(blockedType.eligibleDate)}</span>.
-            </p>
-
-            <div className="mt-6">
-              <BackButton onClick={() => setBlockedType(null)} />
-            </div>
+            <h2 className="text-xl font-semibold text-zinc-900">Todavía no podés reservar {typeName.toLowerCase()}</h2>
+            {blockedType.reason === "cross-type" ? (
+              <p className="mt-2 text-sm text-zinc-500">
+                Donaste sangre entera el {formatDate(blockedType.lastDonationDate)}. Para donar
+                plaquetas o plasma, necesitás esperar hasta el{" "}
+                <span className="font-medium text-zinc-700">{formatDate(blockedType.eligibleDate)}</span>.
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-zinc-500">
+                Ya donaste {typeName.toLowerCase()} el {formatDate(blockedType.lastDonationDate)}. Para
+                donar {typeName.toLowerCase()} de nuevo, necesitás esperar hasta el{" "}
+                <span className="font-medium text-zinc-700">{formatDate(blockedType.eligibleDate)}</span>.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -83,8 +90,9 @@ export function BookingFlow() {
   if (confirmedAppointment) {
     return (
       <div className="w-full">
-        <BookingHeader />
+        <BookingHeader backHref="/" />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:py-16">
+          <ToastStack toasts={toasts} onDismiss={dismissToast} />
           <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
             <StepConfirmation appointment={confirmedAppointment} />
           </div>
@@ -98,7 +106,7 @@ export function BookingFlow() {
   if (existingAppointment) {
     return (
       <div className="w-full">
-        <BookingHeader />
+        <BookingHeader backHref="/" />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:py-16">
           <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
             <h2 className="text-xl font-semibold text-zinc-900">Ya tenés un turno reservado</h2>
@@ -153,6 +161,10 @@ export function BookingFlow() {
                 };
                 saveAppointment(appointment);
                 setConfirmedAppointment(appointment);
+                showToast(
+                  `Te avisamos: se reservó tu turno del ${formatDate(appointment.dateStr)} a las ${time}. Si no fuiste vos, contactanos.`,
+                  "security",
+                );
               }}
               onBack={() => setState((s) => ({ ...s, center: null }))}
             />

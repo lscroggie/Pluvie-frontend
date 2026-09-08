@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { AppointmentSummary } from "@/components/donor-booking/AppointmentSummary";
 import { cancelActiveAppointment, type Appointment } from "@/lib/donor-booking/appointments";
 import { useActiveAppointment } from "@/lib/donor-booking/useActiveAppointment";
+import { ToastStack, useToasts } from "@/components/ui/Toast";
 
 const DATE_LABEL = new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "long" });
 
@@ -12,33 +13,26 @@ function formatDate(dateStr: string): string {
   return DATE_LABEL.format(new Date(`${dateStr}T00:00:00`));
 }
 
-const TOAST_DURATION_MS = 4000;
-
 export function MyAppointmentSection() {
   const appointment = useActiveAppointment();
   const [pendingCancel, setPendingCancel] = useState<Appointment | null>(null);
-  const [showToast, setShowToast] = useState(false);
-
-  useEffect(() => {
-    if (!showToast) return;
-    const timeout = window.setTimeout(() => setShowToast(false), TOAST_DURATION_MS);
-    return () => window.clearTimeout(timeout);
-  }, [showToast]);
+  const { toasts, showToast, dismissToast } = useToasts();
 
   function handleConfirmCancel() {
-    if (pendingCancel) cancelActiveAppointment(pendingCancel);
+    if (pendingCancel) {
+      cancelActiveAppointment(pendingCancel);
+      showToast("Tu turno ha sido cancelado.", "success");
+      showToast(
+        `Te avisamos: se canceló tu turno del ${formatDate(pendingCancel.dateStr)} a las ${pendingCancel.time}. Si no fuiste vos, contactanos.`,
+        "security",
+      );
+    }
     setPendingCancel(null);
-    setShowToast(true);
   }
 
   return (
     <div>
-      {showToast && (
-        <div className="mb-4 flex items-center gap-2 rounded-2xl border border-brand-green/30 bg-brand-green/10 px-4 py-3 text-sm font-medium text-brand-green">
-          <span aria-hidden>✓</span>
-          Tu turno ha sido cancelado.
-        </div>
-      )}
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
 
       {!appointment ? (
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -69,7 +63,7 @@ export function MyAppointmentSection() {
 
       {pendingCancel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 px-4">
-          <div className="w-full max-w-sm rounded-3xl bg-[#fffcf7] p-6 shadow-lg">
+          <div className="w-full max-w-sm rounded-3xl bg-brand-bone p-6 shadow-lg">
             <h3 className="text-lg font-semibold text-zinc-900">¿Cancelar tu turno?</h3>
             <p className="mt-2 text-sm text-zinc-600">
               ¿Estás seguro que querés cancelar tu turno del{" "}

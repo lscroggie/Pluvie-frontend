@@ -6,3 +6,11 @@ export type Donation = {
   date: string; // ISO date (YYYY-MM-DD)
   centerName: string;
 };
+
+export type DonorEditablePersonalData = {
+  phone: string;
+  email: string;
+  address: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+};

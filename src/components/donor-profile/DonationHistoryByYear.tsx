@@ -21,9 +21,7 @@ export function DonationHistoryByYear({ donations }: { donations: Donation[] }) 
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-zinc-900">Historial de donaciones</h2>
-
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         <FilterChip label="Todas" active={filter === "todas"} onClick={() => setFilter("todas")} />
         {donationTypes.map((type) => (
           <FilterChip

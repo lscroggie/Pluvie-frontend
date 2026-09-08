@@ -1,4 +1,5 @@
 import { BookingFlow } from "@/components/donor-booking/BookingFlow";
+import { AuthGate } from "@/components/donor-auth/AuthGate";
 
 export const metadata = {
   title: "Reservar turno · Pluvie",
@@ -7,8 +8,10 @@ export const metadata = {
 
 export default function TurnoPage() {
   return (
-    <div className="flex min-h-full flex-1 bg-zinc-50">
-      <BookingFlow />
-    </div>
+    <AuthGate>
+      <div className="flex min-h-full flex-1 bg-zinc-50">
+        <BookingFlow />
+      </div>
+    </AuthGate>
   );
 }

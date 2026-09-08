@@ -57,6 +57,73 @@ export function getCrossTypeRestriction(
   };
 }
 
+export type SameTypeRestriction = {
+  blocked: true;
+  lastDonationDate: string;
+  eligibleDate: string;
+};
+
+/**
+ * Elegibilidad por MISMO tipo: si el donante donó este mismo tipo hace
+ * menos de ELIGIBILITY_DAYS[tipo] días, no puede reservar ese tipo de
+ * nuevo hasta que se cumpla el plazo.
+ */
+export function getSameTypeRestriction(
+  donations: Donation[],
+  targetTypeId: DonationTypeId,
+  referenceDate: Date,
+): SameTypeRestriction | null {
+  const lastOfType = donations
+    .filter((d) => d.donationTypeId === targetTypeId)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+  if (!lastOfType) return null;
+
+  const lastDate = new Date(`${lastOfType.date}T00:00:00`);
+  const eligibleDate = new Date(lastDate.getTime() + ELIGIBILITY_DAYS[targetTypeId] * MS_PER_DAY);
+
+  if (referenceDate.getTime() >= eligibleDate.getTime()) return null;
+
+  return {
+    blocked: true,
+    lastDonationDate: lastOfType.date,
+    eligibleDate: eligibleDate.toISOString().slice(0, 10),
+  };
+}
+
+export type BookingRestriction = {
+  reason: "cross-type" | "same-type";
+  lastDonationDate: string;
+  eligibleDate: string;
+};
+
+/**
+ * Restricción a aplicar al RESERVAR un turno: combina la elegibilidad por
+ * mismo tipo y la restricción cruzada (sangre entera -> aféresis), y
+ * devuelve la que exija esperar más tiempo.
+ */
+export function getBookingRestriction(
+  donations: Donation[],
+  targetTypeId: DonationTypeId,
+  referenceDate: Date,
+): BookingRestriction | null {
+  const sameType = getSameTypeRestriction(donations, targetTypeId, referenceDate);
+  const crossType = getCrossTypeRestriction(donations, targetTypeId, referenceDate);
+
+  if (sameType && crossType) {
+    return new Date(`${crossType.eligibleDate}T00:00:00`) > new Date(`${sameType.eligibleDate}T00:00:00`)
+      ? { reason: "cross-type", lastDonationDate: crossType.lastWholeBloodDate, eligibleDate: crossType.eligibleDate }
+      : { reason: "same-type", lastDonationDate: sameType.lastDonationDate, eligibleDate: sameType.eligibleDate };
+  }
+  if (crossType) {
+    return { reason: "cross-type", lastDonationDate: crossType.lastWholeBloodDate, eligibleDate: crossType.eligibleDate };
+  }
+  if (sameType) {
+    return { reason: "same-type", lastDonationDate: sameType.lastDonationDate, eligibleDate: sameType.eligibleDate };
+  }
+  return null;
+}
+
 export type EligibilityByType = {
   typeId: DonationTypeId;
   typeName: string;

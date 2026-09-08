@@ -2,12 +2,12 @@ const STEPS = ["Tipo de donación", "Centro", "Fecha y hora", "Confirmación"];
 
 export function Stepper({ currentIndex }: { currentIndex: number }) {
   return (
-    <ol className="flex w-full items-center gap-1 sm:gap-2">
+    <ol className="flex w-full items-start">
       {STEPS.map((label, i) => {
         const state = i < currentIndex ? "done" : i === currentIndex ? "active" : "pending";
         return (
-          <li key={label} className="flex flex-1 items-center gap-1 sm:gap-2">
-            <div className="flex flex-1 flex-col items-center gap-1.5">
+          <li key={label} className="contents">
+            <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
               <div
                 className={[
                   "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-colors",
@@ -32,7 +32,7 @@ export function Stepper({ currentIndex }: { currentIndex: number }) {
             {i < STEPS.length - 1 && (
               <div
                 className={[
-                  "mb-5 h-0.5 flex-1 rounded sm:mb-6",
+                  "mb-5 h-0.5 w-6 shrink-0 rounded sm:mb-6 sm:w-10",
                   state === "done" ? "bg-brand-violet" : "bg-zinc-100",
                 ].join(" ")}
               />
