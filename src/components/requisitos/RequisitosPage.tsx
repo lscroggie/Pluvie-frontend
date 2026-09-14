@@ -10,11 +10,11 @@ const CONDICIONES_GENERALES = [
 ];
 
 const EXCLUSIONES_TEMPORALES = [
-  { motivo: "Tatuajes o piercings recientes", plazo: "1 año" },
-  { motivo: "Cirugías", plazo: "1 año" },
-  { motivo: "Fiebre, gripe o alguna infección", plazo: "7 días" },
-  { motivo: "Tratamiento con antibióticos", plazo: "7 días" },
-  { motivo: "Embarazo o parto reciente", plazo: "6 meses" },
+  "No haberte hecho tatuajes, piercings o perforaciones en el último año.",
+  "No haber tenido cirugías en el último año.",
+  "No haber tenido fiebre, gripe o alguna infección en los últimos 7 días.",
+  "No haber tomado antibióticos en los últimos 7 días.",
+  "No haber estado embarazada o dado a luz en los últimos 6 meses.",
 ];
 
 export function RequisitosPage() {
@@ -43,16 +43,11 @@ export function RequisitosPage() {
 
         <section className="mt-6 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-lg font-semibold text-zinc-900">Te excluyen temporalmente</h2>
-          <ul className="mt-3 flex flex-col gap-3">
-            {EXCLUSIONES_TEMPORALES.map(({ motivo, plazo }) => (
-              <li
-                key={motivo}
-                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-zinc-700"
-              >
-                <span>{motivo}</span>
-                <span className="inline-flex shrink-0 items-center rounded-full bg-brand-coral/10 px-2.5 py-0.5 text-xs font-semibold text-brand-coral">
-                  Esperar {plazo}
-                </span>
+          <ul className="mt-3 flex flex-col gap-2">
+            {EXCLUSIONES_TEMPORALES.map((item) => (
+              <li key={item} className="flex items-start gap-2 text-sm text-zinc-700">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-violet" />
+                {item}
               </li>
             ))}
           </ul>
