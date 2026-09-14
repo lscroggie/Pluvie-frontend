@@ -42,7 +42,7 @@ export function RequisitosPage() {
         </section>
 
         <section className="mt-6 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-          <h2 className="text-lg font-semibold text-zinc-900">Te excluyen temporalmente</h2>
+          <h2 className="text-lg font-semibold text-zinc-900">Condiciones temporales</h2>
           <ul className="mt-3 flex flex-col gap-2">
             {EXCLUSIONES_TEMPORALES.map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm text-zinc-700">
