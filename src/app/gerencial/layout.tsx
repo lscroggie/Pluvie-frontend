@@ -1,5 +1,6 @@
 import { Inter, Poppins } from "next/font/google";
 import { GerencialSidebar } from "@/components/gerencial/GerencialSidebar";
+import { RoleGate } from "@/components/auth/RoleGate";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -15,12 +16,14 @@ const inter = Inter({
 
 export default function GerencialLayout({ children }: LayoutProps<"/gerencial">) {
   return (
-    <div
-      className={`${poppins.variable} ${inter.variable} flex min-h-full flex-1`}
-      style={{ fontFamily: "var(--font-inter)" }}
-    >
-      <GerencialSidebar />
-      <main className="flex-1 bg-zinc-50">{children}</main>
-    </div>
+    <RoleGate role="gerencial">
+      <div
+        className={`${poppins.variable} ${inter.variable} flex min-h-full flex-1`}
+        style={{ fontFamily: "var(--font-inter)" }}
+      >
+        <GerencialSidebar />
+        <main className="flex-1 bg-zinc-50">{children}</main>
+      </div>
+    </RoleGate>
   );
 }

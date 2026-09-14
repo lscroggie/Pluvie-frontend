@@ -26,7 +26,7 @@ function recurringDonorLevelContent(items: DonorLevelBreakdownItem[]) {
   return (
     <MiniBreakdownList
       title="Por nivel Donate"
-      items={items.map((item) => ({ label: item.label, count: item.count, dotClassName: DONOR_LEVEL_COLOR[item.id].dot }))}
+      items={items.map((item) => ({ label: item.label, count: item.count, dotColor: DONOR_LEVEL_COLOR[item.id] }))}
     />
   );
 }

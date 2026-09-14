@@ -25,7 +25,7 @@ export function DonorLevelsChart({ items }: { items: DonorLevelBreakdownItem[] }
             <li key={item.id}>
               <div className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 font-medium text-zinc-700">
-                  <span className={`h-2.5 w-2.5 rounded-full ${color.dot}`} />
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
                   {item.label}
                   <span className="text-xs font-normal text-zinc-400">({DONOR_LEVEL_RANGES[item.id]})</span>
                 </span>
@@ -35,8 +35,8 @@ export function DonorLevelsChart({ items }: { items: DonorLevelBreakdownItem[] }
               </div>
               <div className="mt-1.5 h-2 w-full rounded-full bg-zinc-100">
                 <div
-                  className={`h-2 rounded-full ${color.bar}`}
-                  style={{ width: `${widthPct}%` }}
+                  className="h-2 rounded-full"
+                  style={{ width: `${widthPct}%`, backgroundColor: color }}
                   title={`${item.label}: ${item.count} donantes`}
                 />
               </div>

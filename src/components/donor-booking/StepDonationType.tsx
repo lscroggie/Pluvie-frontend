@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { donationTypes } from "@/lib/donor-booking/data";
 import type { DonationTypeId } from "@/lib/donor-booking/types";
 import { DonationHoursLegend } from "./DonationHoursLegend";
@@ -9,7 +10,15 @@ export function StepDonationType({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-zinc-900">¿Qué querés donar?</h2>
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="text-xl font-semibold text-zinc-900">¿Qué querés donar?</h2>
+        <Link
+          href="/requisitos"
+          className="shrink-0 text-base font-medium text-brand-violet hover:text-brand-violet-dark hover:underline"
+        >
+          Ver requisitos de donación
+        </Link>
+      </div>
       <p className="mt-1 text-sm text-zinc-500">
         Elegí el tipo de donación para ver los centros y turnos disponibles.
       </p>

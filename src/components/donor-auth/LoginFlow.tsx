@@ -3,22 +3,33 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  consumeJustLoggedOut,
   generateMockCode,
   getBiometricCredentialId,
-  login,
   saveBiometricCredentialId,
   saveLoginDocument,
   type DocumentType,
 } from "@/lib/donor-auth/session";
 import { isWebAuthnSupported, registerBiometricCredential, verifyBiometricCredential } from "@/lib/donor-auth/webauthn";
+import { consumeJustLoggedOut, login } from "@/lib/auth/session";
+import { getRoleHome, type Role } from "@/lib/auth";
 import { ToastStack, useToasts } from "@/components/ui/Toast";
 
-type Step = "biometric" | "dni" | "code" | "enable-biometric";
+type Step = "biometric" | "dni" | "code" | "role" | "enable-biometric" | "error";
 
 function getInitialStep(): Step {
   return getBiometricCredentialId() ? "biometric" : "dni";
 }
+
+/** Simula el token que en producción vendría del backend (Go) junto con el rol. */
+function generateMockToken(): string {
+  return `mock-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+const ROLE_OPTIONS: { role: Role; label: string; description: string }[] = [
+  { role: "donante", label: "Donante", description: "Reservar turno y ver mi perfil" },
+  { role: "staff", label: "Staff", description: "Agenda y escaneo de turnos" },
+  { role: "gerencial", label: "Gerencial", description: "Dashboard de donaciones" },
+];
 
 export function LoginFlow() {
   const router = useRouter();
@@ -66,18 +77,30 @@ export function LoginFlow() {
       setError("Código incorrecto. Probá con el código de prueba que te mostramos arriba.");
       return;
     }
-    login();
-    if (isWebAuthnSupported() && !getBiometricCredentialId()) {
+    setError(null);
+    setStep("role");
+  }
+
+  // El ingreso rápido con Face ID/huella solo lo activa el flujo de donante,
+  // así que sabemos el rol sin pedirlo de nuevo.
+  function completeLogin(role: Role) {
+    login(role, generateMockToken());
+    const home = getRoleHome(role);
+    if (!home) {
+      setStep("error");
+      return;
+    }
+    if (role === "donante" && isWebAuthnSupported() && !getBiometricCredentialId()) {
       setStep("enable-biometric");
     } else {
-      router.replace("/perfil");
+      router.replace(home);
     }
   }
 
   async function handleEnableBiometric() {
     const credentialId = await registerBiometricCredential();
     if (credentialId) saveBiometricCredentialId(credentialId);
-    router.replace("/perfil");
+    router.replace(getRoleHome("donante")!);
   }
 
   async function handleVerifyBiometric() {
@@ -91,8 +114,7 @@ export function LoginFlow() {
     const success = await verifyBiometricCredential(credentialId);
     setIsVerifyingBiometric(false);
     if (success) {
-      login();
-      router.replace("/perfil");
+      completeLogin("donante");
     } else {
       setError("No pudimos verificarte con Face ID / huella. Probá de nuevo o usá el código por SMS.");
     }
@@ -151,10 +173,57 @@ export function LoginFlow() {
 
         <button
           type="button"
-          onClick={() => router.replace("/perfil")}
+          onClick={() => router.replace(getRoleHome("donante")!)}
           className="mt-3 w-full text-center text-sm font-medium text-zinc-500 hover:text-zinc-700"
         >
           Ahora no
+        </button>
+      </div>
+    );
+  }
+
+  if (step === "role") {
+    return (
+      <div className="w-full max-w-sm">
+        <h1 className="text-2xl font-semibold text-zinc-900">¿Con qué cuenta ingresás?</h1>
+        <p className="mt-1 text-sm text-zinc-500">
+          Como es un mockup sin backend, elegí el rol que en producción vendría dentro del JWT.
+        </p>
+
+        <div className="mt-4 flex flex-col gap-2">
+          {ROLE_OPTIONS.map(({ role, label, description }) => (
+            <button
+              key={role}
+              type="button"
+              onClick={() => completeLogin(role)}
+              className="flex flex-col items-start gap-0.5 rounded-2xl border border-zinc-200 p-4 text-left transition-colors hover:border-brand-violet hover:bg-brand-violet/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
+            >
+              <span className="font-semibold text-zinc-900">{label}</span>
+              <span className="text-sm text-zinc-500">{description}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "error") {
+    return (
+      <div className="w-full max-w-sm text-center">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-coral/10 text-2xl text-brand-coral">
+          ✕
+        </span>
+        <h1 className="mt-4 text-2xl font-semibold text-zinc-900">No pudimos ingresarte</h1>
+        <p className="mt-1 text-sm text-zinc-500">
+          Tu cuenta tiene un rol que no reconocemos. Contactá a soporte para que lo revisen.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setStep("dni")}
+          className="mt-6 w-full rounded-full border border-zinc-200 px-6 py-3 text-sm font-semibold text-zinc-700 hover:border-brand-violet hover:text-brand-violet"
+        >
+          Volver
         </button>
       </div>
     );

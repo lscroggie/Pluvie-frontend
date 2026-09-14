@@ -113,7 +113,9 @@ export type Suggestion = {
 
 export type BloodType = "O+" | "O-" | "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-";
 
-export type DonorLevelId = "bronce" | "plata" | "oro" | "diamante";
+import type { DonorLevelId } from "@/lib/donor-levels";
+
+export type { DonorLevelId };
 
 export type DonorLevelBreakdownItem = {
   id: DonorLevelId;

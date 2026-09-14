@@ -2,6 +2,7 @@ export type MiniBreakdownItem = {
   label: string;
   count: number;
   dotClassName?: string;
+  dotColor?: string;
 };
 
 export function MiniBreakdownList({ title, items }: { title?: string; items: MiniBreakdownItem[] }) {
@@ -16,8 +17,11 @@ export function MiniBreakdownList({ title, items }: { title?: string; items: Min
           return (
             <li key={item.label} className="flex items-start justify-between gap-2 text-xs">
               <span className="flex min-w-0 flex-1 items-center gap-1.5 text-zinc-600">
-                {item.dotClassName && (
-                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${item.dotClassName}`} />
+                {(item.dotClassName || item.dotColor) && (
+                  <span
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${item.dotClassName ?? ""}`}
+                    style={item.dotColor ? { backgroundColor: item.dotColor } : undefined}
+                  />
                 )}
                 {item.label}
               </span>

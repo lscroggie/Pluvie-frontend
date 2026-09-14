@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { BackButton } from "@/components/donor-booking/BackButton";
-import { logout } from "@/lib/donor-auth/session";
+import { logout } from "@/lib/auth/session";
 import { DONOR_BLOOD_TYPE, DONOR_NAME } from "@/lib/donor-profile/data";
+import { BloodTypeBadge } from "./BloodTypeBadge";
 import { MyAppointmentSection } from "./MyAppointmentSection";
 import { PersonalDataSection } from "./PersonalDataSection";
 
@@ -56,9 +57,7 @@ export function ProfileDrawer() {
             </span>
             <div>
               <p className="font-semibold text-zinc-900">{DONOR_NAME}</p>
-              <span className="mt-0.5 inline-flex items-center rounded-full bg-brand-violet px-2.5 py-0.5 text-xs font-bold text-white">
-                {DONOR_BLOOD_TYPE}
-              </span>
+              <BloodTypeBadge bloodType={DONOR_BLOOD_TYPE} className="mt-0.5" />
             </div>
             <button
               type="button"

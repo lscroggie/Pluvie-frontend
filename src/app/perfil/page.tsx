@@ -1,6 +1,8 @@
 import { BookingHeader } from "@/components/donor-booking/BookingHeader";
-import { AuthGate } from "@/components/donor-auth/AuthGate";
+import { RoleGate } from "@/components/auth/RoleGate";
+import { BloodTypeBadge } from "@/components/donor-profile/BloodTypeBadge";
 import { DonationHistorySection } from "@/components/donor-profile/DonationHistorySection";
+import { DonorLevelSection } from "@/components/donor-profile/DonorLevelSection";
 import { MyAppointmentSection } from "@/components/donor-profile/MyAppointmentSection";
 import { NextDonationEligibility } from "@/components/donor-profile/NextDonationEligibility";
 import { Pluviometro } from "@/components/donor-profile/Pluviometro";
@@ -16,16 +18,14 @@ export default function PerfilPage() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <AuthGate>
+    <RoleGate role="donante">
       <div className="flex min-h-full flex-1 flex-col bg-zinc-50">
         <BookingHeader backHref="/" />
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:py-12">
           <div className="flex items-start justify-between gap-3">
             <p className="text-3xl font-semibold text-zinc-900">Hola, {DONOR_NAME}</p>
             <div className="mt-1 flex items-center gap-3">
-              <span className="inline-flex h-11 shrink-0 items-center rounded-full bg-brand-violet px-5 text-2xl font-extrabold leading-none text-white shadow-sm">
-                {DONOR_BLOOD_TYPE}
-              </span>
+              <BloodTypeBadge bloodType={DONOR_BLOOD_TYPE} />
               <ProfileDrawer />
             </div>
           </div>
@@ -43,10 +43,17 @@ export default function PerfilPage() {
           </section>
 
           <section className="mt-6 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+            <DonorLevelSection donations={donations} />
+          </section>
+
+          <section
+            id="historial"
+            className="mt-6 scroll-mt-6 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8"
+          >
             <DonationHistorySection donations={donations} />
           </section>
         </main>
       </div>
-    </AuthGate>
+    </RoleGate>
   );
 }
