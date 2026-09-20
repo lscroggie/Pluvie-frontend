@@ -59,6 +59,7 @@ export function BloodTypeDrop({
         fill="#ffffff"
         fontSize={groupSize}
         fontWeight="700"
+        style={{ fontFamily: "var(--font-poppins), Arial, Helvetica, sans-serif" }}
       >
         {group}
         {rh && (
