@@ -10,11 +10,11 @@ export function StepDonationType({
 }) {
   return (
     <div>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h2 className="text-xl font-semibold text-zinc-900">¿Qué querés donar?</h2>
         <Link
           href="/requisitos"
-          className="shrink-0 text-base font-medium text-brand-violet hover:text-brand-violet-dark hover:underline"
+          className="whitespace-nowrap text-sm font-medium text-brand-violet hover:text-brand-violet-dark hover:underline"
         >
           Ver requisitos de donación
         </Link>
