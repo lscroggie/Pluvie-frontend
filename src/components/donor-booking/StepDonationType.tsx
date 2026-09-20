@@ -62,10 +62,15 @@ export function StepDonationType({
               style={
                 {
                   "--drop-color": DROP_COLOR[type.id],
-                  ...(isSelected ? { borderColor: DROP_COLOR[type.id] } : {}),
+                  ...(isSelected
+                    ? {
+                        borderColor: DROP_COLOR[type.id],
+                        backgroundColor: `color-mix(in srgb, ${DROP_COLOR[type.id]} 8%, transparent)`,
+                      }
+                    : {}),
                 } as CSSProperties
               }
-              className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 p-5 text-left transition-colors motion-reduce:transition-none hover:border-[var(--drop-color)] hover:bg-brand-violet/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
+              className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 p-5 text-left transition-colors motion-reduce:transition-none hover:border-[var(--drop-color)] hover:bg-[color-mix(in_srgb,var(--drop-color)_8%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center">
                 <DonationDropIcon
