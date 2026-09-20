@@ -13,9 +13,9 @@ export function DonorPortalHeader() {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col items-center">
-        <BloodTypeDrop bloodType={DONOR_BLOOD_TYPE} className="h-32 w-32 sm:h-40 sm:w-40" />
-        <p className="mt-3 text-sm text-zinc-500">Tu grupo sanguíneo</p>
+      <div className="mt-4 flex flex-col items-center">
+        <BloodTypeDrop bloodType={DONOR_BLOOD_TYPE} className="h-20 w-20 sm:h-24 sm:w-24" />
+        <p className="mt-1 text-sm text-zinc-500">Tu grupo sanguíneo</p>
       </div>
     </header>
   );
