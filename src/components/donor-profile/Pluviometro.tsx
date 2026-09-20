@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { donationTypes } from "@/lib/donor-booking/data";
 import {
   getConsecutiveYearStreak,
@@ -99,14 +98,6 @@ export function Pluviometro({ donations, year }: { donations: Donation[]; year: 
           );
         })}
       </div>
-
-      <Link
-        href="#historial"
-        className="mt-4 inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-brand-violet"
-      >
-        Ver mi historial completo
-        <span aria-hidden>→</span>
-      </Link>
     </div>
   );
 }
