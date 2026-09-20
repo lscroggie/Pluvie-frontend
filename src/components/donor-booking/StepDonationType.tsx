@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { donationTypes } from "@/lib/donor-booking/data";
 import type { DonationTypeId } from "@/lib/donor-booking/types";
@@ -52,8 +52,13 @@ export function StepDonationType({
                 setSelectedId(type.id);
                 onSelect(type.id);
               }}
-              style={isSelected ? { borderColor: DROP_COLOR[type.id] } : undefined}
-              className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 p-5 text-left transition-colors motion-reduce:transition-none hover:border-brand-violet hover:bg-brand-violet/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
+              style={
+                {
+                  "--drop-color": DROP_COLOR[type.id],
+                  ...(isSelected ? { borderColor: DROP_COLOR[type.id] } : {}),
+                } as CSSProperties
+              }
+              className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 p-5 text-left transition-colors motion-reduce:transition-none hover:border-[var(--drop-color)] hover:bg-brand-violet/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center">
                 <DonationDropIcon color={DROP_COLOR[type.id]} filled={isSelected} />
