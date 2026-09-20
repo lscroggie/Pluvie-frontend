@@ -1,13 +1,26 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { donationTypes } from "@/lib/donor-booking/data";
 import type { DonationTypeId } from "@/lib/donor-booking/types";
+import { DonationDropIcon } from "./DonationDropIcon";
 import { DonationHoursLegend } from "./DonationHoursLegend";
+
+// Colores propios de este paso: no salen de los tokens compartidos de marca.
+const DROP_COLOR: Record<DonationTypeId, string> = {
+  "sangre-entera": "#C1272D",
+  plaquetas: "#E8A838",
+  plasma: "#7F77DD",
+};
 
 export function StepDonationType({
   onSelect,
 }: {
   onSelect: (typeId: DonationTypeId) => void;
 }) {
+  const [selectedId, setSelectedId] = useState<DonationTypeId | null>(null);
+
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -28,21 +41,29 @@ export function StepDonationType({
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
-        {donationTypes.map((type) => (
-          <button
-            key={type.id}
-            type="button"
-            onClick={() => onSelect(type.id)}
-            className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 p-5 text-left transition-colors hover:border-brand-violet hover:bg-brand-violet/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
-          >
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-violet/10 text-lg font-semibold text-brand-violet group-hover:bg-brand-violet group-hover:text-white">
-              {type.name.charAt(0)}
-            </span>
-            <span className="font-semibold text-zinc-900">{type.name}</span>
-            <span className="text-sm text-zinc-500">{type.description}</span>
-            <span className="text-xs font-medium text-brand-violet">{type.durationLabel}</span>
-          </button>
-        ))}
+        {donationTypes.map((type) => {
+          const isSelected = selectedId === type.id;
+          return (
+            <button
+              key={type.id}
+              type="button"
+              aria-pressed={isSelected}
+              onClick={() => {
+                setSelectedId(type.id);
+                onSelect(type.id);
+              }}
+              style={isSelected ? { borderColor: DROP_COLOR[type.id] } : undefined}
+              className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 p-5 text-left transition-colors motion-reduce:transition-none hover:border-brand-violet hover:bg-brand-violet/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center">
+                <DonationDropIcon color={DROP_COLOR[type.id]} filled={isSelected} />
+              </span>
+              <span className="font-semibold text-zinc-900">{type.name}</span>
+              <span className="text-sm text-zinc-500">{type.description}</span>
+              <span className="text-xs font-medium text-brand-violet">{type.durationLabel}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
