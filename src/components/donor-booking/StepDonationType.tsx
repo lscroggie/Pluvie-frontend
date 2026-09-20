@@ -14,6 +14,13 @@ const DROP_COLOR: Record<DonationTypeId, string> = {
   plasma: "#7F77DD",
 };
 
+// Contorno en reposo. El ámbar #E8A838 da 2.08:1 sobre blanco (mínimo 3:1 para
+// gráficos, WCAG 1.4.11), así que solo el trazo usa un ámbar más oscuro
+// (3.23:1 sobre blanco, 6.12:1 sobre #0a0a0a); el relleno sigue en #E8A838.
+const DROP_OUTLINE: Partial<Record<DonationTypeId, string>> = {
+  plaquetas: "#C2820F",
+};
+
 export function StepDonationType({
   onSelect,
 }: {
@@ -61,7 +68,11 @@ export function StepDonationType({
               className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 p-5 text-left transition-colors motion-reduce:transition-none hover:border-[var(--drop-color)] hover:bg-brand-violet/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center">
-                <DonationDropIcon color={DROP_COLOR[type.id]} filled={isSelected} />
+                <DonationDropIcon
+                  color={DROP_COLOR[type.id]}
+                  outlineColor={DROP_OUTLINE[type.id]}
+                  filled={isSelected}
+                />
               </span>
               <span className="font-semibold text-zinc-900">{type.name}</span>
               <span className="text-sm text-zinc-500">{type.description}</span>

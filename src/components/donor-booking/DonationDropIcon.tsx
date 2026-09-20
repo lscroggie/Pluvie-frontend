@@ -4,16 +4,18 @@ import type { CSSProperties } from "react";
  * Gota reutilizable para las tarjetas de tipo de donación. El color llega por
  * prop y se expone como `--drop-color`.
  *
- * En reposo es solo contorno en gris secundario (`text-zinc-500`, el mismo de
- * la descripción de la tarjeta). Se rellena con `color` si `filled` es true o
- * cuando el ancestro con clase `group` recibe hover.
+ * El contorno siempre es de `color`. En reposo no tiene relleno; se rellena con
+ * `color` si `filled` es true o cuando el ancestro con clase `group` recibe hover.
  */
 export function DonationDropIcon({
   color,
+  outlineColor = color,
   filled = false,
   className,
 }: {
   color: string;
+  /** Color del contorno en reposo; por defecto el mismo de `color`. */
+  outlineColor?: string;
   filled?: boolean;
   className?: string;
 }) {
@@ -21,12 +23,12 @@ export function DonationDropIcon({
     <svg
       viewBox="4.4 1.4 15.2 21.4"
       aria-hidden="true"
-      style={{ "--drop-color": color } as CSSProperties}
+      style={{ "--drop-color": color, "--drop-outline": outlineColor } as CSSProperties}
       className={[
-        "h-10 w-auto text-zinc-500 transition-[fill,stroke] duration-200 motion-reduce:transition-none",
+        "h-10 w-auto transition-[fill,stroke] duration-200 motion-reduce:transition-none",
         filled
           ? "fill-[var(--drop-color)] stroke-[var(--drop-color)]"
-          : "fill-transparent stroke-current group-hover:fill-[var(--drop-color)] group-hover:stroke-[var(--drop-color)]",
+          : "fill-transparent stroke-[var(--drop-outline)] group-hover:fill-[var(--drop-color)] group-hover:stroke-[var(--drop-color)]",
         className ?? "",
       ].join(" ")}
     >
